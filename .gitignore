@@ -100,7 +100,8 @@ Thumbs.db
 *.bak
 *.sav
 
-
+/00-trash/
+/00_trash/
 
 
 
