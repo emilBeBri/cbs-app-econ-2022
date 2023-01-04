@@ -1,0 +1,53 @@
+# Question 2
+
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+source('r/pre-processing.r')
+``` 
+
+
+#### q2.a
+
+the percentage of black employees is signicant and negative, the (log of) labour force is positive and significant, while the rest are not signicant. It is interesting that the rate of high and low educated women is not signicant.  
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+q2a <- unique(f1, by=qc(cmsa99, hig_hpcemp_m_c2000 , urate1980 , pctbl1980 , lnlf1980 , erate_f1980lo , erate_f1980hi) )
+```
+
+#### q2.b
+
+Since the coefficients are not significant, we can only say that there does not seem to be a relationship between women and the adoption of computers in an area, although the model is probably not sophicasted enough to say anything truly weighty about it. The signs also have the wrong type than expected - alot of highly educated women should, in the theory from the paper, mean a higher adoption of PC use. But since they are not significant, I do not put emphasis on this interpretation.  
+
+
+
+
+#### q2.c 
+
+
+``` {r }
+
+```
+
+#### q2.d
+
+
+``` {r }
+
+```
+
+#### q2.e
+
+
+``` {r }
+
+```
+
+#### q2.f
+
+``` {r }
+
+```

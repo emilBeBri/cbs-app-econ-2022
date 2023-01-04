@@ -1,0 +1,42 @@
+
+
+so we try
+
+
+
+
+#### q1.a
+
+the answer is
+
+# there are `r f1[,.N, .(us_hq)][, `:=` (pct = round(100*(N/sum(N)),1))][us_hq == 1, N]`.
+
+
+
+
+
+
+
+
+```{r }
+#| fig-cap: test figure
+# f1[,.N, .(us_hq)][, `:=` (pct = round(100*(N/sum(N)),1), and = N/sum(N)),][order(N)]
+# f1[,.N, .(us_hq)][, `:=` (pct = round(100*(N/sum(N)),1))][order(N)]
+
+
+```
+
+@cameron2005microeconometrics is the shit
+
+
+
+```{r echo=FALSE}
+
+sessionInfo()
+
+
+```
+
+
+
+

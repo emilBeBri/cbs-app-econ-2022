@@ -1,0 +1,121 @@
+# Question 1
+
+
+
+
+this is abnormal! yes it is! according to  @cunningham2021causal. 
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+library(magrittr)
+library(data.table)
+library(dttools)
+library(ggplot2)
+library(fixest)
+
+
+source('r/pre-processing.r')
+
+``` 
+
+
+#### q1.a
+
+
+
+```{r }
+#| label: f-q1a
+#| tbl-cap: "q1.a"
+# f1[,.N, .(us_hq)][, `:=` (pct = round(100*(N/sum(N)),1), and = N/sum(N)),][order(N)]
+
+
+f1[,.N, .(us_hq)][, `:=` (pct = round(100*(N/sum(N)),1))][order(N)] %>%
+ kable() %>% kable_styling(latex_options = "HOLD_position")
+
+
+```
+
+
+
+#### q1.b
+
+
+
+``` {r }
+#| label: t-planets
+#| tbl-cap: "q1.b"
+
+
+f1[ total_raised  > 0, .N  ] 
+f1[ total_raised  > 0, mean(total_raised)  ]
+
+
+```
+
+
+#### q1.c 
+
+the distribution is poisson distributed (#?), with a lot of zeroes and a long tail, where a select few have raised > 100 million dollars.
+
+``` {r }
+#| label: fig-q1c
+#| fig-cap: "q1.c"
+ggplot(f1, aes(total_raised)) + geom_histogram(binwidth=5) + theme_bb()
+
+```
+
+#### q1.d
+
+they add one so that the companies with with zero VC raised can included in the log transformation, since log(0) can't be defined.
+
+``` {r }
+#| label: fig-q1d
+#| fig-cap: "q1.d"
+
+ggplot(f1, aes(ln_raised)) + geom_histogram(binwidth=0.2) + theme_bb()
+
+```
+
+
+#### q1.e
+
+No, the test purely tests for the difference in means, and, using a significance level of 5%, we can reject the null hypothesis of the means of the two groups have a true population mean that is equal.  We might suspect that there are other factors at play that leads a company to establish a headquarter in the US, so that the more succesfull firms will try their luck in the US. Thus, the bias should be positive. 
+
+
+``` {r }
+#| label: fig-q1e
+#| tbl-cap: "q1.e"
+t.test(total_raised ~ us_hq, data = f1, alternative = "two.sided", var.equal = FALSE)
+
+```
+
+
+
+
+#### q1.f
+
+
+the dummy it_software is chosen as the reference for industry, since it is a high-profile industry. 
+
+Robust standard errors are used, under the assumption that the observations will most likely be heteroskedastic, in almost all real life scenarios. (as a side: this does not change the rejection of any parameters under H0) 
+
+we see that us_hq is significant, so that total VC raised is higher for firms with a US headquarter.
+
+we see that the number of founders are significant, so that total VC raised is 0.17 million higher for each additional founder, everything else in the model being equal.
+
+so is prior number of success start ups by the founding team, which might be interpreted as a mix of experience and ability of the team.
+
+we see that the life sciences and medical industry is not significant, so that these are not statistically different from the IT industry. This makes sense, as both of these are high profile industries, and one would expect them to fare good, just as the high-profile industry of IT. 
+
+
+The dummy for communication tech and internet are significantly negative compared to the IT industry, which is somewhat surprising - I do not posses a lot of knowledge about the difference between these.
+
+[not finished - just a lot of blah blah that shows I know how to interpret an OLs] 
+
+``` {r }
+#| label: fig-q1f
+#| tbl-cap: "q1.f"
+feols(ln_raised ~ us_hq + n_founders + prof + n_ssfp + cleantech + comms +  internet + life_science + medical_dev + semicond + misc, data = f1, vcov='hetero') 
+
+```

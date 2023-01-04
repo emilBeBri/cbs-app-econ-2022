@@ -1,0 +1,394 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 5\classexercises.log
+  log type:  text
+ opened on:  18 Nov 2022, 07:58:42
+
+. 
+. * open the dataset from the web (also on CANVAS: DataPSM_birthweight.dta)
+. 
+. webuse cattaneo2
+(Excerpt from Cattaneo (2010) Journal of Econometrics 155: 138–154)
+
+. d
+
+Contains data from https://www.stata-press.com/data/r17/cattaneo2.dta
+ Observations:         4,642                  Excerpt from Cattaneo (2010) Journal of Econometrics 155: 138–154
+    Variables:            23                  14 Jan 2020 09:49
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------
+bweight         int     %9.0g                 Infant birthweight (grams)
+mmarried        byte    %11.0g     mmarried   1 if mother married
+mhisp           byte    %9.0g                 1 if mother hispanic
+fhisp           byte    %9.0g                 1 if father hispanic
+foreign         byte    %9.0g                 1 if mother born abroad
+alcohol         byte    %9.0g                 1 if alcohol consumed during pregnancy
+deadkids        byte    %9.0g                 Previous births where newborn died
+mage            byte    %9.0g                 Mother's age
+medu            byte    %9.0g                 Mother's education attainment
+fage            byte    %9.0g                 Father's age
+fedu            byte    %9.0g                 Father's education attainment
+nprenatal       byte    %9.0g                 Number of prenatal care visits
+monthslb        int     %9.0g                 Months since last birth
+order           byte    %9.0g                 Order of birth of the infant
+msmoke          byte    %27.0g     smoke2     Cigarettes smoked during pregnancy
+mbsmoke         byte    %9.0g      mbsmoke    1 if mother smoked
+mrace           byte    %9.0g                 1 if mother is white
+frace           byte    %9.0g                 1 if father is white
+prenatal        byte    %9.0g                 Trimester of first prenatal care visit
+birthmonth      byte    %9.0g                 Month of birth
+lbweight        byte    %9.0g                 1 if low birthweight baby
+fbaby           byte    %9.0g      YesNo      1 if first baby
+prenatal1       byte    %9.0g      YesNo      1 if first prenatal visit in 1 trimester
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Sorted by: 
+
+. sum                     // % of smoking mothers? 18.6%
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+     bweight |      4,642     3361.68    578.8196        340       5500
+    mmarried |      4,642    .6996984    .4584385          0          1
+       mhisp |      4,642    .0340371    .1813439          0          1
+       fhisp |      4,642     .037053     .188912          0          1
+     foreign |      4,642    .0534252    .2249042          0          1
+-------------+---------------------------------------------------------
+     alcohol |      4,642    .0323137    .1768508          0          1
+    deadkids |      4,642     .259371    .4383367          0          1
+        mage |      4,642    26.50452    5.619026         13         45
+        medu |      4,642    12.68957    2.520661          0         17
+        fage |      4,642    27.26713    9.354411          0         60
+-------------+---------------------------------------------------------
+        fedu |      4,642     12.3072    3.684028          0         17
+   nprenatal |      4,642    10.75808    3.681084          0         40
+    monthslb |      4,642    23.07497    32.66704          0        272
+       order |      4,642    1.892072    1.120506          0         12
+      msmoke |      4,642    .3996122    .8988632          0          3
+-------------+---------------------------------------------------------
+     mbsmoke |      4,642    .1861267    .3892508          0          1
+       mrace |      4,642     .840586    .3661012          0          1
+       frace |      4,642    .8136579    .3894244          0          1
+    prenatal |      4,642    1.201853    .5080401          0          3
+  birthmonth |      4,642    6.540069    3.359167          1         12
+-------------+---------------------------------------------------------
+    lbweight |      4,642    .0603188    .2381022          0          1
+       fbaby |      4,642    .4379578    .4961893          0          1
+   prenatal1 |      4,642    .8013787    .3990052          0          1
+
+. 
+. * check average difference in outcome variable between smokers and non-smokers
+. ttest bweight, by(mbsmoke)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+Nonsmoke |   3,778    3412.912    9.284683    570.6871    3394.708    3431.115
+  Smoker |     864     3137.66    19.08197    560.8931    3100.207    3175.112
+---------+--------------------------------------------------------------------
+Combined |   4,642     3361.68    8.495534    578.8196    3345.025    3378.335
+---------+--------------------------------------------------------------------
+    diff |            275.2519     21.4528                233.1942    317.3096
+------------------------------------------------------------------------------
+    diff = mean(Nonsmoke) - mean(Smoker)                          t =  12.8306
+H0: diff = 0                                     Degrees of freedom =     4640
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+.         // significant difference - birth weight is lower for smoking mothers than non-smokers
+. 
+. * simple OLS - what would be wrong with this approach?
+. reg     bweight mbsmoke mmarried mage medu foreign alcohol deadkids     monthslb fedu fbaby     frace, r
+
+Linear regression                               Number of obs     =      4,642
+                                                F(11, 4630)       =      34.84
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0776
+                                                Root MSE          =     556.55
+
+------------------------------------------------------------------------------
+             |               Robust
+     bweight | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     mbsmoke |  -234.8154   22.75864   -10.32   0.000    -279.4332   -190.1976
+    mmarried |   63.48863   24.57413     2.58   0.010     15.31162    111.6656
+        mage |   1.323292   2.009135     0.66   0.510    -2.615569    5.262153
+        medu |   6.778611   4.049946     1.67   0.094    -1.161212    14.71843
+     foreign |  -23.14642   36.82059    -0.63   0.530    -95.33232    49.03949
+     alcohol |  -33.87593   46.07428    -0.74   0.462    -124.2035    56.45161
+    deadkids |   -22.9981     19.498    -1.18   0.238    -61.22348    15.22727
+    monthslb |  -.0314728   .3571317    -0.09   0.930    -.7316211    .6686754
+        fedu |  -1.461073   3.018872    -0.48   0.628    -7.379501    4.457355
+       fbaby |  -68.52545   21.99613    -3.12   0.002    -111.6483   -25.40256
+       frace |   236.2406   27.95617     8.45   0.000     181.4332     291.048
+       _cons |   3104.668   56.19478    55.25   0.000     2994.499    3214.836
+------------------------------------------------------------------------------
+
+. 
+. * check pairwise correlations between smoking status and several characteristics
+. * of the mother and/or father
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          1
+Outcome model  : matching                                     min =          1
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -244.2217   30.84318    -7.92   0.000    -304.6732   -183.7702
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. tebalance summarize
+(refitting the model using the generate() option)
+
+Covariate balance summary
+
+                         Raw      Matched
+-----------------------------------------
+Number of obs =        4,642        1,728
+Treated obs   =          864          864
+Control obs   =        3,778          864
+-----------------------------------------
+
+-----------------------------------------------------------------
+                |Standardized differences          Variance ratio
+                |        Raw     Matched           Raw    Matched
+----------------+------------------------------------------------
+       mmarried |  -.5953009    .0139064      1.335944   1.001679
+           mage |   -.300179    .0609779      .8818025   .7832322
+           medu |  -.5474357    .0973917      .7315846   .5790033
+        foreign |  -.1706164    .0389479      .4416089   1.286478
+        alcohol |   .3222725    .1039392      4.509207   1.393752
+       deadkids |   .1613223    .0324965      1.171182   1.026952
+       monthslb |   .1841973     .088508      1.373939    1.01519
+           fedu |  -.5182535    .0694342      1.385118   .8077553
+          fbaby |  -.1663271   -.1088601      .9430944   .9556138
+          frace |  -.1755916   -.0716029      1.290599   1.096867
+-----------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), nn(3)
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          3
+Outcome model  : matching                                     min =          3
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATE                    |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -216.7233   28.48581    -7.61   0.000    -272.5544   -160.8921
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. 
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), nn(3) atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          3
+Outcome model  : matching                                     min =          3
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -241.8204   26.71167    -9.05   0.000    -294.1743   -189.4665
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. 
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), nn(3) atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          3
+Outcome model  : matching                                     min =          3
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -241.8204   26.71167    -9.05   0.000    -294.1743   -189.4665
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. 
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), nn(3) atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          3
+Outcome model  : matching                                     min =          3
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -241.8204   26.71167    -9.05   0.000    -294.1743   -189.4665
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. 
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), nn(3) atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          3
+Outcome model  : matching                                     min =          3
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -241.8204   26.71167    -9.05   0.000    -294.1743   -189.4665
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. tebalance summarize
+(refitting the model using the generate() option)
+
+Covariate balance summary
+
+                         Raw      Matched
+-----------------------------------------
+Number of obs =        4,642        1,728
+Treated obs   =          864          864
+Control obs   =        3,778          864
+-----------------------------------------
+
+-----------------------------------------------------------------
+                |Standardized differences          Variance ratio
+                |        Raw     Matched           Raw    Matched
+----------------+------------------------------------------------
+       mmarried |  -.5953009    .0281824      1.335944   1.003812
+           mage |   -.300179    .0822206      .8818025    .821453
+           medu |  -.5474357    .0773128      .7315846   .5847595
+        foreign |  -.1706164   -.0219609      .4416089   .8800422
+        alcohol |   .3222725    .1102361      4.509207   1.426029
+       deadkids |   .1613223    .0679733      1.171182   1.060219
+       monthslb |   .1841973    .0342187      1.373939     .94847
+           fedu |  -.5182535    .0682487      1.385118   .7964706
+          fbaby |  -.1663271   -.0699057      .9430944   .9685019
+          frace |  -.1755916   -.0621367      1.290599   1.082631
+-----------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. teffects psmatch (bweight) (mbsmoke mmarried mage medu foreign alcohol ///
+>                                                         deadkids monthslb fedu fbaby frace), atet
+
+Treatment-effects estimation                   Number of obs      =      4,642
+Estimator      : propensity-score matching     Matches: requested =          1
+Outcome model  : matching                                     min =          1
+Treatment model: logit                                        max =         31
+----------------------------------------------------------------------------------------
+                       |              AI robust
+               bweight | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-----------------------+----------------------------------------------------------------
+ATET                   |
+               mbsmoke |
+(Smoker vs Nonsmoker)  |  -244.2217   30.84318    -7.92   0.000    -304.6732   -183.7702
+----------------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. tebalance summarize
+(refitting the model using the generate() option)
+
+Covariate balance summary
+
+                         Raw      Matched
+-----------------------------------------
+Number of obs =        4,642        1,728
+Treated obs   =          864          864
+Control obs   =        3,778          864
+-----------------------------------------
+
+-----------------------------------------------------------------
+                |Standardized differences          Variance ratio
+                |        Raw     Matched           Raw    Matched
+----------------+------------------------------------------------
+       mmarried |  -.5953009    .0139064      1.335944   1.001679
+           mage |   -.300179    .0609779      .8818025   .7832322
+           medu |  -.5474357    .0973917      .7315846   .5790033
+        foreign |  -.1706164    .0389479      .4416089   1.286478
+        alcohol |   .3222725    .1039392      4.509207   1.393752
+       deadkids |   .1613223    .0324965      1.171182   1.026952
+       monthslb |   .1841973     .088508      1.373939    1.01519
+           fedu |  -.5182535    .0694342      1.385118   .8077553
+          fbaby |  -.1663271   -.1088601      .9430944   .9556138
+          frace |  -.1755916   -.0716029      1.290599   1.096867
+-----------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\ys.si\AppData\Local\Temp\STD5470_000000.tmp"
+
+. teffects overlap
+(refitting the model using the generate() option)
+
+. 
+end of do-file
+
+. exit, clear

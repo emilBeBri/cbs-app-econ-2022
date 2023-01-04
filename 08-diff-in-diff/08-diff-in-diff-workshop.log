@@ -1,0 +1,794 @@
+--------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Se
+> ssion 8\workshop_Vodka.log
+  log type:  text
+ opened on:  11 Dec 2022, 14:41:58
+
+. 
+. * open the dataset (available on CANVAS)
+. use VodkaData.dta
+
+. 
+. * a)
+. ttest logvodka, by(y2011)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  55,355    2.815043    .0119451    2.810397     2.79163    2.838455
+       1 |  22,880    1.913206    .0175745    2.658338    1.878759    1.947653
+---------+--------------------------------------------------------------------
+Combined |  78,235    2.551299    .0099999    2.797023    2.531699    2.570898
+---------+--------------------------------------------------------------------
+    diff |             .901837    .0217456                .8592158    .9444582
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  41.4722
+H0: diff = 0                                     Degrees of freedom =    78233
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+.         /*
+>         we observe a decrease in consumption of vodka after 2011.
+>         the difference is large and statistically significant
+>         */
+.         
+. 
+. * b) 
+. ttest logvodka, by(hdrinker50)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  39,094    .5025856    .0073066    1.444684    .4882644    .5169068
+       1 |  39,141    4.597551    .0114966    2.274495    4.575018    4.620085
+---------+--------------------------------------------------------------------
+Combined |  78,235    2.551299    .0099999    2.797023    2.531699    2.570898
+---------+--------------------------------------------------------------------
+    diff |           -4.094966    .0136255               -4.121672    -4.06826
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t = -3.0e+02
+H0: diff = 0                                     Degrees of freedom =    78233
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+.         /*
+>         yes, we do confirm that heavy drinkers have consumed (much) more vodka than others 
+>         heavy drinkers consume about 2.5 times more vodka
+>         we need to compute the following ratio:
+>         */
+.         di exp(2.815)/exp(1.913)
+2.4645272
+
+.         
+. 
+. *c.i)
+.  
+. ttest logvodka if y2011 == 0, by(hdrinker50)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  25,895     .610904    .0097648     1.57135    .5917644    .6300436
+       1 |  29,460    4.752455    .0125589    2.155598    4.727839    4.777071
+---------+--------------------------------------------------------------------
+Combined |  55,355    2.815043    .0119451    2.810397     2.79163    2.838455
+---------+--------------------------------------------------------------------
+    diff |           -4.141551    .0162251               -4.173353    -4.10975
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t = -2.6e+02
+H0: diff = 0                                     Degrees of freedom =    55353
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+. ttest logvodka if y2011 == 1, by(hdrinker50)    
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  13,199    .2900766    .0098074    1.126744    .2708527    .3093006
+       1 |   9,681    4.126167     .025875    2.545895    4.075447    4.176888
+---------+--------------------------------------------------------------------
+Combined |  22,880    1.913206    .0175745    2.658338    1.878759    1.947653
+---------+--------------------------------------------------------------------
+    diff |           -3.836091    .0249439               -3.884983   -3.787199
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t = -1.5e+02
+H0: diff = 0                                     Degrees of freedom =    22878
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+. 
+.         /*
+>         the difference has decreased from 4.14 pre-policy to 3.84 post-policy
+>         based on these tests, we cannot yet see if the difference is statistically significant
+>         */
+. 
+. * c.ii)
+. 
+. ttest logvodka if hdrinker50 == 0, by(y2011)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  25,895     .610904    .0097648     1.57135    .5917644    .6300436
+       1 |  13,199    .2900766    .0098074    1.126744    .2708527    .3093006
+---------+--------------------------------------------------------------------
+Combined |  39,094    .5025856    .0073066    1.444684    .4882644    .5169068
+---------+--------------------------------------------------------------------
+    diff |            .3208274    .0153655                .2907106    .3509441
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  20.8797
+H0: diff = 0                                     Degrees of freedom =    39092
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+. ttest logvodka if hdrinker50 == 1, by(y2011)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  29,460    4.752455    .0125589    2.155598    4.727839    4.777071
+       1 |   9,681    4.126167     .025875    2.545895    4.075447    4.176888
+---------+--------------------------------------------------------------------
+Combined |  39,141    4.597551    .0114966    2.274495    4.575018    4.620085
+---------+--------------------------------------------------------------------
+    diff |            .6262879    .0264572                .5744312    .6781446
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  23.6718
+H0: diff = 0                                     Degrees of freedom =    39139
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+.         
+.         /*
+>         non-heavy drinkers reduced their vodka intake by approx 32% post-2011
+>         heavy drinkers reduced their intake by 63%
+>         we would conclude, based on these simple t-tests, that the tax has been effective in reducing
+>         vodka consumption, specially among heavy drinkers
+>         */
+. 
+. * d) 
+. ttest logprice_vodka_real , by(y2011)
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |  55,488     .408596    .0014681    .3458313    .4057184    .4114735
+       1 |  22,999    .6351647    .0026637     .403961    .6299437    .6403858
+---------+--------------------------------------------------------------------
+Combined |  78,487    .4749873    .0013498    .3781582    .4723416    .4776329
+---------+--------------------------------------------------------------------
+    diff |           -.2265688    .0028533               -.2321611   -.2209764
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t = -79.4071
+H0: diff = 0                                     Degrees of freedom =    78485
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+.         /*
+>         23% higher prices post-2011
+>         */
+. 
+. 
+. * Exercise 2
+. * a) 
+. bysort year: egen vodka_nonheavy=mean(logvodka) if hdrinker50==0
+(39,413 missing values generated)
+
+. lab var vodka_nonheavy "Non-heavy drinkers"
+
+. bysort year: egen vodka_heavy=mean(logvodka) if hdrinker50==1
+(39,366 missing values generated)
+
+. lab var vodka_heavy "Heavy drinkers"
+
+. 
+. 
+. * b)
+. twoway (connected vodka_nonheavy vodka_heavy year), xline(2011) ytitle("Vodka consumption") xtitle("Ye
+> ar") xlab(1994(2)2014)
+
+. 
+. /*
+>         overall, one can see a slight decrease in alcohol consumption from the mid-90s to the 2000s fo
+> r both groups
+>         one could say that the two groups have fairly parallel trends though it is difficult to assess
+>  whether their different fluctuations are significantly different from each other
+>         focusing the attention on the 2-3 years just before the tax introduction, we do see some fluct
+> uations: heavy drinkers reduce their consumption slightly and the others seem to increase it slightly 
+> as well. In other words, there "vertical distance" reduces slightly which may indicate some potential 
+> selection concerns. (we will go back to this question more formally in Exercises 3 and 4)
+>         after the tax: we see a drop in consumption for both groups but this drop seems much more pron
+> ounced for heavy drinkers
+> */
+. 
+. * c)
+. reg logvodka  i.hdrinker50##i.y2011, cluster(idind)
+
+Linear regression                               Number of obs     =     78,235
+                                                F(3, 19622)       =   16489.71
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.5420
+                                                Root MSE          =     1.8929
+
+                                 (Std. err. adjusted for 19,623 clusters in idind)
+----------------------------------------------------------------------------------
+                 |               Robust
+        logvodka | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-----------------+----------------------------------------------------------------
+    1.hdrinker50 |   4.141551   .0221334   187.12   0.000     4.098168    4.184935
+         1.y2011 |  -.3208274   .0160663   -19.97   0.000    -.3523186   -.2893361
+                 |
+hdrinker50#y2011 |
+            1 1  |  -.3054605    .037404    -8.17   0.000    -.3787756   -.2321455
+                 |
+           _cons |    .610904   .0131301    46.53   0.000     .5851678    .6366402
+----------------------------------------------------------------------------------
+
+. 
+.         /*
+>         the coeff of "hdrinker50" corresponds to the pre-policy difference in consumption between the 
+> two groups 
+>         this corresponds to the vertical difference we observe between the two lines in b) - pre-2011
+>         the coefficient of y2011 represents the effect of the federal tax on non-heavy drinkers (decli
+> ne of 32% in consumption)
+>         the interaction term captures the additional change in consumption, resulting from the tax pol
+> icy, on heavy-drinkers.
+>         their consumption decreases by an additional 31%
+>         in conclusion, the effect of the policy was more pronounced for heavy-drinkers than non-heavy-
+> drinkers
+>         
+>         the std errors should be clustered to account for the correlation between observations belongi
+> ng to the same individual
+>         */
+.  
+. *d) 
+. global controls logincome age age_2 smokes married college curwrk stroke 
+
+. reg logvodka  i.hdrinker50##i.y2011 $controls, cluster(idind)
+
+Linear regression                               Number of obs     =     71,408
+                                                F(11, 18458)      =    4837.73
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.5455
+                                                Root MSE          =     1.8809
+
+                                 (Std. err. adjusted for 18,459 clusters in idind)
+----------------------------------------------------------------------------------
+                 |               Robust
+        logvodka | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-----------------+----------------------------------------------------------------
+    1.hdrinker50 |   4.038695   .0235352   171.60   0.000     3.992564    4.084826
+         1.y2011 |  -.3021244   .0170196   -17.75   0.000    -.3354843   -.2687645
+                 |
+hdrinker50#y2011 |
+            1 1  |  -.2854086   .0381764    -7.48   0.000    -.3602378   -.2105793
+                 |
+       logincome |   .0127253   .0059873     2.13   0.034     .0009897     .024461
+             age |   .0399834   .0055497     7.20   0.000     .0291054    .0508613
+           age_2 |  -.0003133   .0000677    -4.63   0.000    -.0004459   -.0001806
+          smokes |   .1002142   .0203147     4.93   0.000     .0603954    .1400329
+         married |   .1130529   .0247058     4.58   0.000     .0646272    .1614786
+         college |   .1600213   .0235713     6.79   0.000     .1138194    .2062231
+          curwrk |   .1887477   .0252363     7.48   0.000     .1392821    .2382132
+          stroke |  -.2015387   .0802314    -2.51   0.012    -.3587997   -.0442777
+           _cons |  -.7604916   .0901598    -8.43   0.000    -.9372131   -.5837701
+----------------------------------------------------------------------------------
+
+. 
+.         /*
+>         we observe a positive elasticity between income and vodka consumption; a 1% increase in income
+>  is associated with a 1.3% increase in vodka consumption
+>         older individuals drink more than younger, but at a decreasing pace (inverted U-shaped relatio
+> nship)
+>         individuals that smoke tend to drink approx 10% more 
+>         married individuals also drink more (!), as do individuals with college degrees (!) and indivi
+> duals who are currently working (!) - apply interpretation of dummy variables here
+>         individuals who had a stroke in the past drink less than those who never experienced a stroke
+>         
+>         the estimates of interest change slightly because part of the differences previously captured 
+> in the simpler regression could be attributed to those other differences (socio-economic characteristi
+> cs, health issues, etc). 
+>         Excluding those variables - which are, individually and jointly, significant predictors of alc
+> ohol consumption, could easily overestimate the effects of the policy and the differences between the 
+> two groups
+>         */
+. 
+. 
+.         
+. * Exercise 3    
+. 
+. * a)    
+. xtset idind     
+
+Panel variable: idind (unbalanced)
+
+. xtreg logvodka  i.hdrinker50##i.y2011, fe r
+
+Fixed-effects (within) regression               Number of obs     =     78,235
+Group variable: idind                           Number of groups  =     19,623
+
+R-squared:                                      Obs per group:
+     Within  = 0.4446                                         min =          1
+     Between = 0.6010                                         avg =        4.0
+     Overall = 0.5411                                         max =         19
+
+                                                F(3,19622)        =    7410.24
+corr(u_i, Xb) = 0.1698                          Prob > F          =     0.0000
+
+                                 (Std. err. adjusted for 19,623 clusters in idind)
+----------------------------------------------------------------------------------
+                 |               Robust
+        logvodka | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-----------------+----------------------------------------------------------------
+    1.hdrinker50 |   3.740659    .027372   136.66   0.000     3.687008    3.794311
+         1.y2011 |  -.1324575   .0220267    -6.01   0.000    -.1756318   -.0892833
+                 |
+hdrinker50#y2011 |
+            1 1  |  -.2535335   .0413119    -6.14   0.000    -.3345084   -.1725586
+                 |
+           _cons |   .7499558   .0144634    51.85   0.000     .7216063    .7783053
+-----------------+----------------------------------------------------------------
+         sigma_u |  1.5090284
+         sigma_e |  1.6858998
+             rho |  .44480909   (fraction of variance due to u_i)
+----------------------------------------------------------------------------------
+
+. xtreg logvodka  i.hdrinker50##i.y2011 $controls, fe r
+
+Fixed-effects (within) regression               Number of obs     =     71,408
+Group variable: idind                           Number of groups  =     18,459
+
+R-squared:                                      Obs per group:
+     Within  = 0.4407                                         min =          1
+     Between = 0.4764                                         avg =        3.9
+     Overall = 0.4692                                         max =         18
+
+                                                F(11,18458)       =    1860.55
+corr(u_i, Xb) = 0.0247                          Prob > F          =     0.0000
+
+                                 (Std. err. adjusted for 18,459 clusters in idind)
+----------------------------------------------------------------------------------
+                 |               Robust
+        logvodka | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-----------------+----------------------------------------------------------------
+    1.hdrinker50 |   3.682916   .0290169   126.92   0.000      3.62604    3.739791
+         1.y2011 |   .1008402   .0286269     3.52   0.000     .0447287    .1569516
+                 |
+hdrinker50#y2011 |
+            1 1  |  -.2065782   .0428165    -4.82   0.000    -.2905024    -.122654
+                 |
+       logincome |   .0075535   .0065667     1.15   0.250    -.0053179    .0204249
+             age |  -.0017636   .0096393    -0.18   0.855    -.0206574    .0171303
+           age_2 |  -.0004263   .0001122    -3.80   0.000    -.0006462   -.0002063
+          smokes |   .1023019   .0299812     3.41   0.001      .043536    .1610679
+         married |  -.0855639   .0362008    -2.36   0.018    -.1565209   -.0146069
+         college |  -.0513909   .0462752    -1.11   0.267    -.1420946    .0393127
+          curwrk |   .0476914    .028172     1.69   0.090    -.0075282    .1029111
+          stroke |  -.2178228   .0975341    -2.23   0.026    -.4089986    -.026647
+           _cons |   1.410303   .1946237     7.25   0.000     1.028823    1.791784
+-----------------+----------------------------------------------------------------
+         sigma_u |  1.6986105
+         sigma_e |  1.6858455
+             rho |   .5037716   (fraction of variance due to u_i)
+----------------------------------------------------------------------------------
+
+. 
+.         /*
+>         i. the estimated impact of the federal tax on non-heavy-drinkers, based on a model without con
+> trol variables, is a reduction of approx 13% in vodka consumption. 
+>         however, when we control for other aspects in which these individuals differ, we obtain a posi
+> tive estimate for the coefficient of y2011, meaning that everything else equal (including unobservable
+>  aspects), non heavy-drinkers increased their consumption by 10% (approx) after 2011. We should theref
+> ore be carefull when attributing changes in alcohol consumption to the federal tax vs. other aspects t
+> hat may make individuals different from each others
+>         
+>         ii. in both cases, we obtain a negative and significant coefficient for the interaction term, 
+> suggesting that the policy had a different effect for heavy and non-heavy drinkers
+>         when it comes to estimating the impact of the federal tax on vodka consumption of this particu
+> lar group of individuals, we need to "sum up" the two coefficients: 
+>         in a model without controls, we estimate a decrease of nearly 39% in consumption (-0.132-0.254
+> )
+>         when we include control variables, the change in consumption within this particular group is m
+> uch smaller: 10.6% decrease (0.101-0.207)
+> 
+>         */
+. 
+. *b) 
+. * in case they want to reproduce the output
+. 
+. gen years_post = year - 2011
+
+. gen years_pre = 2011 - year
+
+. replace years_post = 0 if years_post < 0
+(55,508 real changes made)
+
+. replace years_pre = 0 if years_pre < 0
+(18,437 real changes made)
+
+. xtreg logvodka  i.hdrinker50##i.years_pre i.hdrinker50##i.years_post $controls if year >= 2008, fe r
+
+Fixed-effects (within) regression               Number of obs     =     35,337
+Group variable: idind                           Number of groups  =     13,363
+
+R-squared:                                      Obs per group:
+     Within  = 0.4097                                         min =          1
+     Between = 0.5855                                         avg =        2.6
+     Overall = 0.5336                                         max =          7
+
+                                                F(21,13362)       =     419.35
+corr(u_i, Xb) = 0.1779                          Prob > F          =     0.0000
+
+                                      (Std. err. adjusted for 13,363 clusters in idind)
+---------------------------------------------------------------------------------------
+                      |               Robust
+             logvodka | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------+----------------------------------------------------------------
+         1.hdrinker50 |   3.653408    .063289    57.73   0.000     3.529353    3.777463
+                      |
+            years_pre |
+                   1  |  -.0130925   .0624875    -0.21   0.834    -.1355768    .1093918
+                   2  |   .0749833   .0946966     0.79   0.428    -.1106355    .2606021
+                   3  |  -.0525739   .1310422    -0.40   0.688    -.3094353    .2042874
+                      |
+ hdrinker50#years_pre |
+                 1 1  |   .0131028   .0896595     0.15   0.884    -.1626425    .1888482
+                 1 2  |  -.2464012   .0834221    -2.95   0.003    -.4099203    -.082882
+                 1 3  |  -.0170154    .084402    -0.20   0.840    -.1824553    .1484246
+                      |
+           years_post |
+                   1  |  -.1260879   .0526852    -2.39   0.017    -.2293583   -.0228175
+                   2  |  -.1729076   .0891398    -1.94   0.052    -.3476342    .0018191
+                   3  |  -.2280786   .1268946    -1.80   0.072    -.4768099    .0206528
+                      |
+hdrinker50#years_post |
+                 1 1  |   -.377689   .0728358    -5.19   0.000    -.5204575   -.2349205
+                 1 2  |   -.384279   .0758887    -5.06   0.000    -.5330317   -.2355264
+                 1 3  |  -.4588321    .081265    -5.65   0.000    -.6181231   -.2995411
+                      |
+            logincome |   .0181487   .0108974     1.67   0.096    -.0032118    .0395093
+                  age |   .0050412   .0449289     0.11   0.911    -.0830257    .0931081
+                age_2 |  -.0000512   .0002528    -0.20   0.839    -.0005468    .0004443
+               smokes |   .1038342   .0464003     2.24   0.025     .0128831    .1947853
+              married |  -.0645199    .058724    -1.10   0.272    -.1796273    .0505876
+              college |  -.1102237   .0729204    -1.51   0.131     -.253158    .0327106
+               curwrk |   .0001932   .0454676     0.00   0.997    -.0889298    .0893162
+               stroke |  -.0964041   .1390985    -0.69   0.488    -.3690569    .1762488
+                _cons |   .4957966   1.623898     0.31   0.760    -2.687273    3.678866
+----------------------+----------------------------------------------------------------
+              sigma_u |   1.556954
+              sigma_e |  1.6174961
+                  rho |  .48093527   (fraction of variance due to u_i)
+---------------------------------------------------------------------------------------
+
+. 
+.         /*
+>         
+>         i. there are different coefficients for years_pre and years_post because these are "dummy vari
+> ables" for each respective year; having one coefficient for each variable would impose a linear trend 
+> pre- and post- policy 
+>         
+>         ii. looking at the coefficients of years_pre, we see that all of them are not significant - so
+>  no significant pre-trend for non-heavy drinkers
+>         
+>         iii. looking at the interaction between hdrinker50 and years_pre, we see that 2 out of 3 coeff
+> icients are statistically insignificant. However, in t-2 (i.e. 2009) we see a drop in the relative con
+> sumption of heavy-drinkers (compared to non-heavy drinkers). 
+>         We could test whether this gap between the two groups in 2009 was significantly different from
+>  the gap observed in 2011, based on the following test:   
+>         */
+.         
+.         test 2.years_pre - 1.hdrinker50#2.years_pre=0
+
+ ( 1)  2.years_pre - 1.hdrinker50#2.years_pre = 0
+
+       F(  1, 13362) =    5.10
+            Prob > F =    0.0239
+
+.         
+.         /*
+>         this difference is statistically different from zero, which indicates that the difference betw
+> een the two groups was smaller in 2009 than in 2011. This could raise concerns and bias the estimated 
+> effect of the tax change. (We will return to this in question 4c)
+>         
+>         
+>         iv. non-heavy drinkers reduced their consumption by nearly 13% from 2011 to 2012
+>         this difference is significant (p = 0.017)
+>         
+>         v. heavy-drinkers' consumption of vodka was about 69% lower in 2014 than their own consumption
+>  in 2011 (we need to sum the two coefficients: -0.228-0.459)
+>         compared to the change in consumption by non-heavy drinkers in that same year, heavy-drinkers 
+> consumed 46% less vodka. 
+>         
+>         vi. the effect of the policy does not seem to be short-lived; we see a persistent decrease in 
+> the consumption of alcohol, especially for heavy drinkers, in the 3 years following the tax reform. 
+>         
+>         */
+. 
+.         
+. * Exercise 4
+. 
+. *a) 
+. diff logvodka, treated(hdrinker50) period(y2011) cluster(idind)
+
+DIFFERENCE-IN-DIFFERENCES ESTIMATION RESULTS
+Number of observations in the DIFF-IN-DIFF: 78235
+            Before         After    
+   Control: 25895          13199       39094
+   Treated: 29460          9681        39141
+            55355          22880
+--------------------------------------------------------
+ Outcome var.   | logvo~a | S. Err. |   |t|   |  P>|t|
+----------------+---------+---------+---------+---------
+Before          |         |         |         | 
+   Control      | 0.611   |         |         | 
+   Treated      | 4.752   |         |         | 
+   Diff (T-C)   | 4.142   | 0.022   | 187.12  | 0.000***
+After           |         |         |         | 
+   Control      | 0.290   |         |         | 
+   Treated      | 4.126   |         |         | 
+   Diff (T-C)   | 3.836   | 0.033   | 116.86  | 0.000***
+                |         |         |         | 
+Diff-in-Diff    | -0.305  | 0.037   | 8.17    | 0.000***
+--------------------------------------------------------
+R-square:    0.54
+* Means and Standard Errors are estimated by linear regression
+**Clustered Std. Errors
+**Inference: *** p<0.01; ** p<0.05; * p<0.1
+
+. 
+.         /*
+>         similar estimate of DiD as obtained in 2c
+>         note however that this output gives us the difference between T and C before and after
+>         the first difference is comparable to the coefficient of hdrinker50 in the OLS model
+>         the second difference is comparable to the sum of the coefficients of hdrinker50+y2011 in the 
+> OLS model (4.142-0.305 = 3.836)
+>         */
+.         
+. *b) 
+. diff logvodka, treated(hdrinker50) period(y2011) cov($controls) report cluster(idind)
+DIFFERENCE-IN-DIFFERENCES WITH COVARIATES
+
+DIFFERENCE-IN-DIFFERENCES ESTIMATION RESULTS
+Number of observations in the DIFF-IN-DIFF: 71408
+            Before         After    
+   Control: 23361          12469       35830
+   Treated: 26366          9212        35578
+            49727          21681
+Report - Covariates and coefficients:
+-------------------------------------------------------------------
+ Variable(s)         |   Coeff.   | Std. Err. |    t    |  P>|t|
+---------------------+------------+-----------+---------+----------
+logincome            | 0.013      | 0.006     | 2.125   | 0.034
+age                  | 0.040      | 0.006     | 7.205   | 0.000
+age_2                | -0.000     | 0.000     | -4.629  | 0.000
+smokes               | 0.100      | 0.020     | 4.933   | 0.000
+married              | 0.113      | 0.025     | 4.576   | 0.000
+college              | 0.160      | 0.024     | 6.789   | 0.000
+curwrk               | 0.189      | 0.025     | 7.479   | 0.000
+stroke               | -0.202     | 0.080     | -2.512  | 0.012
+-------------------------------------------------------------------
+--------------------------------------------------------
+ Outcome var.   | logvo~a | S. Err. |   |t|   |  P>|t|
+----------------+---------+---------+---------+---------
+Before          |         |         |         | 
+   Control      | -0.760  |         |         | 
+   Treated      | 3.278   |         |         | 
+   Diff (T-C)   | 4.039   | 0.024   | 171.60  | 0.000***
+After           |         |         |         | 
+   Control      | -1.063  |         |         | 
+   Treated      | 2.691   |         |         | 
+   Diff (T-C)   | 3.753   | 0.034   | 111.17  | 0.000***
+                |         |         |         | 
+Diff-in-Diff    | -0.285  | 0.038   | 7.48    | 0.000***
+--------------------------------------------------------
+R-square:    0.55
+* Means and Standard Errors are estimated by linear regression
+**Clustered Std. Errors
+**Inference: *** p<0.01; ** p<0.05; * p<0.1
+
+. 
+. 
+. *c) with matching
+. diff logvodka if year >=2008, treated(hdrinker50) period(y2011) cov($controls) id(idind) k cluster(idi
+> nd)
+KERNEL PROPENSITY SCORE MATCHING DIFFERENCE-IN-DIFFERENCES
+    Matching iterations...
+........................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> ......................................................................................................
+> .........................
+DIFFERENCE-IN-DIFFERENCES ESTIMATION RESULTS
+Number of observations in the DIFF-IN-DIFF: 27543
+            Before         After    
+   Control: 6959           3940        10899
+   Treated: 6963           9681        16644
+            13922          13621
+--------------------------------------------------------
+ Outcome var.   | logvo~a | S. Err. |   |t|   |  P>|t|
+----------------+---------+---------+---------+---------
+Before          |         |         |         | 
+   Control      | 0.524   |         |         | 
+   Treated      | 4.588   |         |         | 
+   Diff (T-C)   | 4.064   | 0.036   | 113.61  | 0.000***
+After           |         |         |         | 
+   Control      | 0.330   |         |         | 
+   Treated      | 4.126   |         |         | 
+   Diff (T-C)   | 3.797   | 0.040   | 94.14   | 0.000***
+                |         |         |         | 
+Diff-in-Diff    | -0.268  | 0.049   | 5.45    | 0.000***
+--------------------------------------------------------
+R-square:    0.45
+* Means and Standard Errors are estimated by linear regression
+**Clustered Std. Errors
+**Inference: *** p<0.01; ** p<0.05; * p<0.1
+
+. 
+. /*
+> DIFFERENCE-IN-DIFFERENCES ESTIMATION RESULTS
+> Number of observations in the DIFF-IN-DIFF: 27510
+>             Before         After    
+>    Control: 6959           3907        10866
+>    Treated: 6963           9681        16644
+>             13922          13588
+> --------------------------------------------------------
+>  Outcome var.   | logvo~a | S. Err. |   |t|   |  P>|t|
+> ----------------+---------+---------+---------+---------
+> Before          |         |         |         | 
+>    Control      | 0.524   |         |         | 
+>    Treated      | 4.588   |         |         | 
+>    Diff (T-C)   | 4.064   | 0.035   | 115.07  | 0.000***
+> After           |         |         |         | 
+>    Control      | 0.311   |         |         | 
+>    Treated      | 4.126   |         |         | 
+>    Diff (T-C)   | 3.816   | 0.040   | 94.91   | 0.000***
+>                 |         |         |         | 
+> Diff-in-Diff    | -0.249  | 0.054   | 4.65    | 0.000***
+> --------------------------------------------------------
+> R-square:    0.45
+> * Means and Standard Errors are estimated by linear regression
+> **Inference: *** p<0.01; ** p<0.05; * p<0.1
+> 
+> 
+> */
+. 
+. /*
+> the estimate is slightly smaller now, we can even compare it with the DiD obtained in the 2 models abo
+> ve when restricting to the same period
+> (-0.286 vs -0.249)
+> implementing propensity score matching and DiD simultaneously may have reduced concerns with the non-p
+> arallel trends identified in Exercise 2 and 3. This must be a less biased estimate of the "true" effec
+> t of the tax reform, net of selection effects (driven by observables)
+> */
+. diff logvodka if year >= 2008, treated(hdrinker50) period(y2011) cov($controls) report cluster(idind)
+DIFFERENCE-IN-DIFFERENCES WITH COVARIATES
+
+DIFFERENCE-IN-DIFFERENCES ESTIMATION RESULTS
+Number of observations in the DIFF-IN-DIFF: 35337
+            Before         After    
+   Control: 6959           12469       19428
+   Treated: 6697           9212        15909
+            13656          21681
+Report - Covariates and coefficients:
+-------------------------------------------------------------------
+ Variable(s)         |   Coeff.   | Std. Err. |    t    |  P>|t|
+---------------------+------------+-----------+---------+----------
+logincome            | 0.018      | 0.008     | 2.156   | 0.031
+age                  | 0.065      | 0.007     | 9.603   | 0.000
+age_2                | -0.001     | 0.000     | -6.770  | 0.000
+smokes               | 0.132      | 0.025     | 5.393   | 0.000
+married              | 0.089      | 0.029     | 3.045   | 0.002
+college              | -0.015     | 0.030     | -0.487  | 0.626
+curwrk               | 0.054      | 0.032     | 1.711   | 0.087
+stroke               | -0.253     | 0.103     | -2.464  | 0.014
+-------------------------------------------------------------------
+--------------------------------------------------------
+ Outcome var.   | logvo~a | S. Err. |   |t|   |  P>|t|
+----------------+---------+---------+---------+---------
+Before          |         |         |         | 
+   Control      | -1.330  |         |         | 
+   Treated      | 2.691   |         |         | 
+   Diff (T-C)   | 4.022   | 0.035   | 114.81  | 0.000***
+After           |         |         |         | 
+   Control      | -1.527  |         |         | 
+   Treated      | 2.209   |         |         | 
+   Diff (T-C)   | 3.736   | 0.034   | 110.08  | 0.000***
+                |         |         |         | 
+Diff-in-Diff    | -0.286  | 0.044   | 6.52    | 0.000***
+--------------------------------------------------------
+R-square:    0.54
+* Means and Standard Errors are estimated by linear regression
+**Clustered Std. Errors
+**Inference: *** p<0.01; ** p<0.05; * p<0.1
+
+. 
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Se
+> ssion 8\workshop_Vodka.log
+  log type:  text
+ closed on:  11 Dec 2022, 14:46:02
+--------------------------------------------------------------------------------------------------------

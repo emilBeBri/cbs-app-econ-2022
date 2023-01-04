@@ -1,0 +1,34 @@
+# Question 2
+
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+source('r/pre-processing.r')
+
+``` 
+
+
+#### q2.a
+
+Once again IT and software is chosen as the reference category.
+
+There are positive and significant parameters at at least the 1 percent level for the no. of founders and the prior success of the founders with other startups.
+
+The industry dummies are all negative compared to the reference category, but are not all significant. The significant ones are clean tech, communication tech,  life sciences, medical dev and miscellaneous. This means that the probability of moving the startup hq to the US is significantly less likely in one of these industries, relative to the IT industry. This could likely be because IT is an industry that is very much centered around the US, if I were to speculate on the reasons behind this difference. 
+
+
+
+``` {r }
+
+
+```
+
+#### q2.b
+
+
+
+
+
+

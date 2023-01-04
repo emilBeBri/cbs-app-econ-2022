@@ -1,0 +1,791 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 4\workshop_selection.log
+  log type:  text
+ opened on:  11 Nov 2022, 13:00:38
+
+. 
+. * open the dataset (available on CANVAS)
+. use ReflexItaly.dta
+
+. d
+
+Contains data from ReflexItaly.dta
+ Observations:         2,108                  
+    Variables:            11                  7 Nov 2017 16:49
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+employed        byte    %9.0g                 1 if employed, 0 otherwise - unemployed/inactive
+lnwage          float   %9.0g                 hourly wage in logs
+female          byte    %9.0g                 dummy=1 for women, 0 for men
+age             byte    %9.0g                 age of the individual, in years
+child           byte    %9.0g                 1 if at least 1 child, 0 if no children
+stem            byte    %9.0g                 1 if s/he has a degree in Science, Mathematics or Engineering, 0 if not
+goodgrades      byte    %9.0g                 1 if s/he had better grades than most of the colleagues in class, 0 otherwise
+unemp6more      byte    %9.0g                 1 if s/he was unemployed for 6 or more months since graduation, 0 otherwise
+lookjobbefore   byte    %9.0g                 1 if s/he started looking for a job before graduation, 0 otherwise
+livewpartner    byte    %9.0g                 1 if s/he lives with partner/spouse, 0 otherwise
+livewparents    byte    %9.0g                 1 if s/he lives with parents, 0 otherwise
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Sorted by: 
+
+. 
+. 
+. ***************************************
+. * Exercise 2 - descriptive statistics *
+. ***************************************
+. 
+. sum lnwage, detail
+
+                     hourly wage in logs
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     1.059392        .548566
+ 5%     1.529395        .548566
+10%     1.752539        .548566       Obs               1,714
+25%     1.999399       .6539264       Sum of wgt.       1,714
+
+50%     2.263364                      Mean           2.255826
+                        Largest       Std. dev.      .4290796
+75%     2.540996       3.321155
+90%     2.802361       3.321155       Variance       .1841093
+95%     2.956511       3.334578       Skewness      -.3557703
+99%     3.138833       3.351395       Kurtosis       3.687166
+
+. hist lnwage
+(bin=32, start=.54856598, width=.0875884)
+
+. tabstat lnwage, by(employed)
+
+Summary for variables: lnwage
+Group variable: employed (1 if employed, 0 otherwise - unemployed/inactive)
+
+employed |      Mean
+---------+----------
+       0 |         .
+       1 |  2.255826
+---------+----------
+   Total |  2.255826
+--------------------
+
+. 
+. mdesc lnwage // shows the amount of missing values in the variable (19%)
+
+    Variable    |     Missing          Total     Percent Missing
+----------------+-----------------------------------------------
+         lnwage |         394          2,108          18.69
+----------------+-----------------------------------------------
+
+. 
+. local varlist "female age child stem goodgrades unemp6more lookjobbefore livewpartner livewparents"
+
+. foreach var of local varlist {
+  2.         describe `var'
+  3.         ttest `var', by(employed)
+  4. }
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+female          byte    %9.0g                 dummy=1 for women, 0 for men
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .6878173    .0233746    .4639731    .6418623    .7337722
+       1 |   1,714    .5320887    .0120558    .4991149    .5084431    .5557343
+---------+--------------------------------------------------------------------
+Combined |   2,108    .5611954    .0108109    .4963587    .5399944    .5823965
+---------+--------------------------------------------------------------------
+    diff |            .1557286      .02753                .1017398    .2097174
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   5.6567
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+age             byte    %9.0g                 age of the individual, in years
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    32.57868    .2065508    4.099916     32.1726    32.98476
+       1 |   1,714    32.46383     .092703    3.837951      32.282    32.64565
+---------+--------------------------------------------------------------------
+Combined |   2,108    32.48529    .0846713    3.887511    32.31925    32.65134
+---------+--------------------------------------------------------------------
+    diff |            .1148529    .2172339               -.3111626    .5408684
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   0.5287
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.7015         Pr(|T| > |t|) = 0.5971          Pr(T > t) = 0.2985
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+child           byte    %9.0g                 1 if at least 1 child, 0 if no children
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .1903553    .0198031    .3930806     .151422    .2292886
+       1 |   1,714    .1376896    .0083254    .3446745    .1213606    .1540186
+---------+--------------------------------------------------------------------
+Combined |   2,108    .1475332    .0077259    .3547208    .1323819    .1626845
+---------+--------------------------------------------------------------------
+    diff |            .0526657    .0197899                 .013856    .0914754
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   2.6612
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.9961         Pr(|T| > |t|) = 0.0078          Pr(T > t) = 0.0039
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+stem            byte    %9.0g                 1 if s/he has a degree in Science, Mathematics or Engineering, 0 if not
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .1979695    .0201001    .3989757    .1584524    .2374867
+       1 |   1,714    .3203034    .0112735    .4667293    .2981921    .3424147
+---------+--------------------------------------------------------------------
+Combined |   2,108    .2974383    .0099588    .4572395    .2779082    .3169685
+---------+--------------------------------------------------------------------
+    diff |           -.1223338    .0254128               -.1721706   -.0724971
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  -4.8139
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 1.0000
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+goodgrades      byte    %9.0g                 1 if s/he had better grades than most of the colleagues in class, 0 otherwise
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .4568528    .0251276    .4987682    .4074515    .5062541
+       1 |   1,714    .4533256    .0120279     .497962    .4297346    .4769165
+---------+--------------------------------------------------------------------
+Combined |   2,108    .4539848    .0108465    .4979962    .4327138    .4752558
+---------+--------------------------------------------------------------------
+    diff |            .0035272    .0278297               -.0510494    .0581039
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   0.1267
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.5504         Pr(|T| > |t|) = 0.8992          Pr(T > t) = 0.4496
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+unemp6more      byte    %9.0g                 1 if s/he was unemployed for 6 or more months since graduation, 0 otherwise
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .4720812    .0251823    .4998547    .4225723    .5215901
+       1 |   1,714    .2164527    .0099503    .4119466    .1969368    .2359687
+---------+--------------------------------------------------------------------
+Combined |   2,108    .2642315    .0096057    .4410278    .2453938    .2830692
+---------+--------------------------------------------------------------------
+    diff |            .2556285    .0240085                .2085456    .3027114
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  10.6474
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+lookjobbefore   byte    %9.0g                 1 if s/he started looking for a job before graduation, 0 otherwise
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .0634518    .0122968    .2440837    .0392761    .0876274
+       1 |   1,714    .1184364    .0078071    .3232185    .1031239    .1337489
+---------+--------------------------------------------------------------------
+Combined |   2,108    .1081594    .0067662    .3106553    .0948903    .1214285
+---------+--------------------------------------------------------------------
+    diff |           -.0549846    .0173192               -.0889491   -.0210202
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  -3.1748
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0008         Pr(|T| > |t|) = 0.0015          Pr(T > t) = 0.9992
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+livewpartner    byte    %9.0g                 1 if s/he lives with partner/spouse, 0 otherwise
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .4060914    .0247728    .4917264    .3573875    .4547952
+       1 |   1,714    .4597433    .0120415    .4985222    .4361258    .4833608
+---------+--------------------------------------------------------------------
+Combined |   2,108    .4497154    .0108375    .4975831     .428462    .4709687
+---------+--------------------------------------------------------------------
+    diff |           -.0536519    .0277822               -.1081353    .0008315
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =  -1.9312
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 0.0268         Pr(|T| > |t|) = 0.0536          Pr(T > t) = 0.9732
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+livewparents    byte    %9.0g                 1 if s/he lives with parents, 0 otherwise
+
+Two-sample t test with equal variances
+------------------------------------------------------------------------------
+   Group |     Obs        Mean    Std. err.   Std. dev.   [95% conf. interval]
+---------+--------------------------------------------------------------------
+       0 |     394    .4517766    .0251041    .4983018    .4024216    .5011317
+       1 |   1,714    .3214702    .0112843    .4671771    .2993377    .3436028
+---------+--------------------------------------------------------------------
+Combined |   2,108    .3458254     .010362    .4757495    .3255046    .3661462
+---------+--------------------------------------------------------------------
+    diff |            .1303064    .0264346                .0784658     .182147
+------------------------------------------------------------------------------
+    diff = mean(0) - mean(1)                                      t =   4.9294
+H0: diff = 0                                     Degrees of freedom =     2106
+
+    Ha: diff < 0                 Ha: diff != 0                 Ha: diff > 0
+ Pr(T < t) = 1.0000         Pr(|T| > |t|) = 0.0000          Pr(T > t) = 0.0000
+
+.  
+. ttable2  female age child stem goodgrades unemp6more lookjobbefore livewpartner livewparents,by(employed)
+
+--------------------------------------------------------------------------
+Variables   G1(0)            Mean1     G2(1)          Mean2      MeanDiff
+--------------------------------------------------------------------------
+female        394             0.688       1714         0.532      0.156***
+age           394            32.579       1714        32.464      0.115
+child         394             0.190       1714         0.138      0.053***
+stem          394             0.198       1714         0.320     -0.122***
+goodgrades    394             0.457       1714         0.453      0.004
+unemp6more    394             0.472       1714         0.216      0.256***
+lookjobb~e    394             0.063       1714         0.118     -0.055***
+livewpar~r    394             0.406       1714         0.460     -0.054*
+livewpar~s    394             0.452       1714         0.321      0.130***
+--------------------------------------------------------------------------
+
+.  
+.  /*
+>  we find some significant differences for some variables - e.g. female
+>  there is a higher proportion of women in the non-employed group than in the
+>  employed group. Women may actually be more likely to be non-employed due to 
+>  a variety of reasons - e.g., materny leave. Indeed, people with kids are more often out of employment. 
+>  If we neglect this factor we may end up obtaining biased estimates of the gender wage gap, since we do not know how much those women who are out of the labor market would earn, would they be
+>  employed. Other significant differences may also indicate that those who are not 
+>  employed by the time of the survey may be different in some respect; 
+>  neglecting these differences may bias the estimation of their effect on wages.
+>  
+>  */
+.  
+. ****************************************
+. * Exercise 3 - OLS regression for wage *
+. ****************************************
+.  
+. reg lnwage  female age stem goodgrades unemp6more, r
+
+Linear regression                               Number of obs     =      1,714
+                                                F(5, 1708)        =      10.99
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0299
+                                                Root MSE          =     .42323
+
+------------------------------------------------------------------------------
+             |               Robust
+      lnwage | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      female |  -.0579554    .022193    -2.61   0.009    -.1014837   -.0144272
+         age |   .0059483   .0029267     2.03   0.042     .0002081    .0116885
+        stem |    .073642   .0233422     3.15   0.002     .0278597    .1194242
+  goodgrades |   .0621429   .0206602     3.01   0.003      .021621    .1026648
+  unemp6more |  -.0801151   .0281392    -2.85   0.004     -.135306   -.0249241
+       _cons |   2.059142   .0999934    20.59   0.000     1.863019    2.255264
+------------------------------------------------------------------------------
+
+.  
+.  /*
+>  All the coefficients are statistically significant in this regression.
+>  Since the dependent variable is in logs, women are estimated to earn on average
+>  approx. 5.8% less than men, everything else constant, while STEM graduates seem
+>  to earn approx. 7.4% higher hourly wages, on average. There is also an approx. 6.2% wage premium
+>  for the best students with good grades, while those who suffered a period of 
+>  unemployment of 6 or more months after graduation earn approx. 8% lower earnings on avg. 
+>  Hourly wage seems to increase by 0.6% for every additional year of age. 
+>  
+>  However, we should be aware of the incidental truncation problem we have in
+>  these data. We did see in ex 2 that there is a much higher (lower) share of
+>  women (stem graduates) among those who are not employed. This sample selection
+>  may bias the estimates of the "true" effects of these variables on wages. 
+>  */
+.  
+. ********************************************
+. * Exercise 4 - Probit for Heckman 1st step *
+. ********************************************
+.  
+. probit employed female age stem goodgrades unemp6more child livewpartner ///
+>                                 livewparents lookjobbefore, r
+
+Iteration 0:   log pseudolikelihood = -1015.4382  
+Iteration 1:   log pseudolikelihood = -922.19953  
+Iteration 2:   log pseudolikelihood = -920.69884  
+Iteration 3:   log pseudolikelihood = -920.69633  
+Iteration 4:   log pseudolikelihood = -920.69633  
+
+Probit regression                                       Number of obs =  2,108
+                                                        Wald chi2(9)  = 171.47
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -920.69633                       Pseudo R2     = 0.0933
+
+-------------------------------------------------------------------------------
+              |               Robust
+     employed | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+       female |   -.300244   .0722955    -4.15   0.000    -.4419406   -.1585473
+          age |  -.0084107   .0087782    -0.96   0.338    -.0256157    .0087942
+         stem |   .2915619   .0807967     3.61   0.000     .1332034    .4499205
+   goodgrades |  -.0921593   .0667496    -1.38   0.167    -.2229861    .0386676
+   unemp6more |  -.6480324   .0695146    -9.32   0.000    -.7842785   -.5117862
+        child |  -.3767451   .1002643    -3.76   0.000    -.5732596   -.1802306
+ livewpartner |   .0314227   .1009898     0.31   0.756    -.1665137    .2293591
+ livewparents |  -.4071088   .0976509    -4.17   0.000    -.5985009   -.2157166
+lookjobbefore |    .414927   .1229448     3.37   0.001     .1739597    .6558943
+        _cons |   1.683176   .3164157     5.32   0.000     1.063012    2.303339
+-------------------------------------------------------------------------------
+
+.                                 
+.  /*                             
+> 
+>  Note that now all the 2,108 observations are used, while the OLS was only using
+>  the observations for employed individuals. Remember the interpretation in probit
+>  regressions in terms of log of odds. 
+>  
+>  We see, for instance, that women are significantly less likely to be in the 
+>  labor force, which implies that there is also a potential gender gap in labor
+>  participation. 
+>   
+>  */
+.  
+.  // to interpret the coeff of female, we need to compute the mg effects:
+.  
+. margins, dydx(female)   // women have a prob. of being employed 7.3 percentage points lower than that of men
+
+Average marginal effects                                 Number of obs = 2,108
+Model VCE: Robust
+
+Expression: Pr(employed), predict()
+dy/dx wrt:  female
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      female |  -.0730501   .0174539    -4.19   0.000    -.1072591   -.0388411
+------------------------------------------------------------------------------
+
+. 
+. /*
+> overall, we also see that STEM graduates and those who looked for jobs before 
+> graduating are more likely to be employed at the time of the data collection; 
+> graduates with kids and those who live with parents have a lower chance to be employed
+> we cannot interpret the size of the coefficients directly, we would need to compute mg effects
+> there is no significant association between employment and individuals' age, their grades
+> and whether they live with a partner (according to this dataset)
+> */
+. 
+. test child livewpartner livewparents lookjobbefore
+
+ ( 1)  [employed]child = 0
+ ( 2)  [employed]livewpartner = 0
+ ( 3)  [employed]livewparents = 0
+ ( 4)  [employed]lookjobbefore = 0
+
+           chi2(  4) =   49.80
+         Prob > chi2 =    0.0000
+
+. 
+.  /*
+>  even though "livewpartner" does not seem to be significantly associated with
+>  labor participation, these 4 variables altogether are significant predictors
+>  of selection into the labor market
+>  
+>  It makes sense (theoretically) to include these variables in the labor force
+>  selection equation. By extending this probit model with these variables, we 
+>  are assuming they do not affect the main outcome equation. They are therefore
+>  our exclusion restrictions. Theoretically they make sense, but we should test
+>  whether or not they affect wages.
+>  
+>  */
+. 
+. *** estimating IMR manually
+. 
+. predict xbeta, xb
+
+. gen mills = normalden(xbeta) / normal(xbeta)
+
+. label var mills "Inverse Mills ratio"
+
+. 
+. 
+. **********************************
+. * Exercise 5 - OLS including IMR *
+. **********************************
+. 
+. reg lnwage female age stem goodgrades unemp6more mills, r
+
+Linear regression                               Number of obs     =      1,714
+                                                F(6, 1707)        =      12.37
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0423
+                                                Root MSE          =     .42065
+
+------------------------------------------------------------------------------
+             |               Robust
+      lnwage | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+      female |  -.0084099   .0248943    -0.34   0.736    -.0572363    .0404166
+         age |   .0075572   .0029439     2.57   0.010     .0017832    .0133312
+        stem |   .0237375   .0250774     0.95   0.344    -.0254481    .0729231
+  goodgrades |   .0757732   .0206298     3.67   0.000     .0353108    .1162356
+  unemp6more |   .0644469   .0449393     1.43   0.152    -.0236951    .1525889
+       mills |  -.5241339   .1215076    -4.31   0.000    -.7624535   -.2858144
+       _cons |   2.115799   .1002121    21.11   0.000     1.919248    2.312351
+------------------------------------------------------------------------------
+
+. 
+. pwcorr female age stem goodgrades unemp6more mills if employed == 1, star (0.01) 
+
+             |   female      age     stem goodgr~s unemp6~e    mills
+-------------+------------------------------------------------------
+      female |   1.0000 
+         age |  -0.0896*  1.0000 
+        stem |  -0.2785* -0.0113   1.0000 
+  goodgrades |  -0.0057  -0.1113*  0.0581   1.0000 
+  unemp6more |   0.0670* -0.0318  -0.0207  -0.0318   1.0000 
+       mills |   0.3988*  0.0181  -0.3582*  0.0312   0.7061*  1.0000 
+
+. 
+. /*
+> 
+>  the gender wage gap and the premium to STEM education is no longer significant
+>  other coefficients on the other hand remain more or less unchanged
+> 
+>  As in Certo et al. (2016), one way to "imperfectly" assess the strength of the exclusion
+>  restrictions is to look at the correlation between IMR and X's. 
+>  
+>  In their paper, a correlation of 0.31 was perceived to be fine (the lower, the better). 
+>  In our case, corr(gender, IMR) = 0.399, which seems close to the reference used in
+>  Certo et al. 2016. But if one can find exclusion restrictions that would decrease
+>  the correlations even further, it would be desirable. 
+>  
+>  
+> */
+. 
+. *******************************
+. * Exercise 6 - Heckman models *
+. *******************************
+. 
+. heckman lnwage female age stem goodgrades  unemp6more , ///
+>                 select(employed = female age child stem goodgrades ///
+>                 unemp6more  livewpartner livewparents lookjobbefore) twostep 
+note: two-step estimate of rho = -1.0000786 is being truncated to -1
+
+Heckman selection model -- two-step estimates   Number of obs     =      2,108
+(regression model with sample selection)              Selected    =      1,714
+                                                      Nonselected =        394
+
+                                                Wald chi2(5)      =      18.32
+                                                Prob > chi2       =     0.0026
+
+-------------------------------------------------------------------------------
+              | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+lnwage        |
+       female |  -.0084099   .0279096    -0.30   0.763    -.0631116    .0462919
+          age |   .0075572   .0031449     2.40   0.016     .0013933    .0137211
+         stem |   .0237375   .0295635     0.80   0.422    -.0342058    .0816808
+   goodgrades |   .0757732     .02437     3.11   0.002      .028009    .1235375
+   unemp6more |   .0644469   .0452893     1.42   0.155    -.0243185    .1532123
+        _cons |   2.115799    .107845    19.62   0.000     1.904427    2.327172
+--------------+----------------------------------------------------------------
+employed      |
+       female |   -.300244   .0722849    -4.15   0.000    -.4419198   -.1585681
+          age |  -.0084107    .008599    -0.98   0.328    -.0252644     .008443
+        child |  -.3767451   .1018437    -3.70   0.000    -.5763551    -.177135
+         stem |   .2915619   .0793768     3.67   0.000     .1359863    .4471376
+   goodgrades |  -.0921593   .0674677    -1.37   0.172    -.2243935     .040075
+   unemp6more |  -.6480324   .0699766    -9.26   0.000    -.7851841   -.5108806
+ livewpartner |   .0314227   .1001378     0.31   0.754    -.1648439    .2276892
+ livewparents |  -.4071088   .0948133    -4.29   0.000    -.5929394   -.2212782
+lookjobbefore |    .414927   .1226621     3.38   0.001     .1745137    .6553403
+        _cons |   1.683176   .3058512     5.50   0.000     1.083718    2.282633
+--------------+----------------------------------------------------------------
+/mills        |
+       lambda |  -.5241339   .1273939    -4.11   0.000    -.7738214   -.2744465
+--------------+----------------------------------------------------------------
+          rho |   -1.00000
+        sigma |  .52413394
+-------------------------------------------------------------------------------
+
+.                 
+. * the coefficients are the same as obtained in ex 5 (OLS with mills)            
+.                 
+.         
+. heckman lnwage female age stem goodgrades  unemp6more , ///
+>                 select(employed = female age child stem goodgrades ///
+>                 unemp6more  livewpartner livewparents lookjobbefore) vce(r)     
+
+Iteration 0:   log pseudolikelihood = -1897.7801  
+Iteration 1:   log pseudolikelihood = -1868.9635  
+Iteration 2:   log pseudolikelihood = -1868.6763  
+Iteration 3:   log pseudolikelihood = -1868.6758  
+Iteration 4:   log pseudolikelihood = -1868.6758  
+
+Heckman selection model                         Number of obs     =      2,108
+(regression model with sample selection)              Selected    =      1,714
+                                                      Nonselected =        394
+
+                                                Wald chi2(5)      =      24.60
+Log pseudolikelihood = -1868.676                Prob > chi2       =     0.0002
+
+-------------------------------------------------------------------------------
+              |               Robust
+              | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+lnwage        |
+       female |  -.0315842   .0237972    -1.33   0.184    -.0782258    .0150573
+          age |   .0068762   .0029942     2.30   0.022     .0010076    .0127448
+         stem |   .0479441   .0243035     1.97   0.049     .0003101    .0955782
+   goodgrades |   .0695649   .0214967     3.24   0.001     .0274321    .1116978
+   unemp6more |  -.0020364   .0322206    -0.06   0.950    -.0651875    .0611148
+        _cons |   2.083311   .1030928    20.21   0.000     1.881253    2.285369
+--------------+----------------------------------------------------------------
+employed      |
+       female |  -.2970577   .0714498    -4.16   0.000    -.4370968   -.1570186
+          age |  -.0079035   .0084441    -0.94   0.349    -.0244536    .0086465
+        child |  -.3442372   .0976616    -3.52   0.000    -.5356504    -.152824
+         stem |   .2803352   .0801439     3.50   0.000     .1232559    .4374144
+   goodgrades |  -.0824248   .0660036    -1.25   0.212    -.2117895      .04694
+   unemp6more |  -.5855541   .0760529    -7.70   0.000    -.7346151    -.436493
+ livewpartner |   .0302516   .0966754     0.31   0.754    -.1592288     .219732
+ livewparents |   -.487959   .0921846    -5.29   0.000    -.6686375   -.3072805
+lookjobbefore |   .4008855   .1136028     3.53   0.000     .1782281    .6235429
+        _cons |   1.660031    .303669     5.47   0.000     1.064851    2.255211
+--------------+----------------------------------------------------------------
+      /athrho |  -.6889242   .1223469    -5.63   0.000    -.9287197   -.4491287
+     /lnsigma |  -.7954879    .032465   -24.50   0.000    -.8591181   -.7318576
+--------------+----------------------------------------------------------------
+          rho |  -.5972904   .0786989                     -.7299964   -.4211826
+        sigma |    .451361   .0146534                      .4235354    .4810146
+       lambda |  -.2695936   .0429111                     -.3536978   -.1854894
+-------------------------------------------------------------------------------
+Wald test of indep. eqns. (rho = 0): chi2(1) = 31.71      Prob > chi2 = 0.0000
+
+. 
+. /*
+> 
+>  rho is negative and significantly different from zero;
+>  it gives the correlation between the error terms of the 2 equations.
+>  
+>  the fact that it is negative indicates that there are unobserved factors
+>  making individuals more likely to participate in the labor market that 
+>  simultaneously DECREASE their hourly wage. In other words, wages in this sample
+>  are shifted downwards due to a NEGATIVE selection effect. A person with sample average
+>  characteristics who selects into wage employment earns lower
+>  wages than a person randomly drawn from the population would earn. 
+>  
+>  Note however that this is in contrast with what labor economics papers normally find - usually, 
+>  people in the labor market tend to be POSITIVELY selected, meaning that the
+>  unobserved characteristics that make them more likely to work also tend to contribute positively 
+>  to their wages - this could be, for instance, innate ability. 
+>  
+>  this sample here may have been collected at a "special" point in time and space - it captures Italian graduates in certain fields, 
+>  who may have struggled to find jobs at that point in time for different reasons (e.g. economic conditions) and this may contribute to this "different finding". 
+>  Indeed, the study where this dataset comes from finds that many graduates found jobs for which they were overeducated/overskilled, 
+>  which pushed their wages downwards. Still, those employed may be a "negative" selection of young individuals; those who were not working at the
+>  time were probably "brighter" and were studying more (e.g. masters), or migrated out of the country, waiting/looking for better job opportunities.
+>  
+>  */
+.  
+.         
+. ***************************************
+. * Exercise 7 - Exclusion Restrictions *
+. ***************************************
+. 
+. reg lnwage  female age stem goodgrades unemp6more ///
+>                         child livewpartner livewparents lookjobbefore, r
+
+Linear regression                               Number of obs     =      1,714
+                                                F(9, 1704)        =      11.43
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0535
+                                                Root MSE          =     .41855
+
+-------------------------------------------------------------------------------
+              |               Robust
+       lnwage | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+--------------+----------------------------------------------------------------
+       female |  -.0768409   .0221805    -3.46   0.001    -.1203448   -.0333371
+          age |   .0041228   .0029449     1.40   0.162    -.0016532    .0098987
+         stem |   .0697957   .0230602     3.03   0.003     .0245665    .1150249
+   goodgrades |   .0611085   .0204393     2.99   0.003     .0210198    .1011972
+   unemp6more |  -.0690585   .0279668    -2.47   0.014    -.1239115   -.0142056
+        child |  -.0126633   .0325245    -0.39   0.697    -.0764555    .0511288
+ livewpartner |   .0194199   .0285381     0.68   0.496    -.0365535    .0753933
+ livewparents |  -.1265761   .0287319    -4.41   0.000    -.1829297   -.0702225
+lookjobbefore |   .0532504   .0312949     1.70   0.089      -.00813    .1146308
+        _cons |    2.15496   .1007239    21.39   0.000     1.957405    2.352516
+-------------------------------------------------------------------------------
+
+. 
+. /*
+> none of them are significantly related to wages, except livewparents
+> 
+> Yet, note that "livewparents" may capture other job characteristics that we cannot
+> control for - e.g., job location or the skill level required. Theoretically, it 
+> makes sense that wages will not DIRECTLY depend on whether one lives with their parents; 
+> however, living with their parents may signal something else about the individual, which is 
+> unobservable, that could correlate with their labor market participation - e.g. financial
+> dependency? 
+> 
+>         as long as this variable does not correlate with any "unobservables" that could also 
+>         predict wages (e.g., individual's intelligence), it may make sense theoretically to consider it
+>         but ideally, we would find variables that, controlling for everything else, no longer relate to wages. 
+> 
+> */
+.                 
+. 
+. * heckman without exclusion restrictions
+. 
+. heckman lnwage female age stem goodgrades  unemp6more , ///
+>                 select(employed = female age stem goodgrades unemp6more) twostep
+note: two-step estimate of rho = 1.2277813 is being truncated to 1
+
+Heckman selection model -- two-step estimates   Number of obs     =      2,108
+(regression model with sample selection)              Selected    =      1,714
+                                                      Nonselected =        394
+
+                                                Wald chi2(5)      =       9.85
+                                                Prob > chi2       =     0.0797
+
+------------------------------------------------------------------------------
+             | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+lnwage       |
+      female |  -.1359475   .0908602    -1.50   0.135    -.3140303    .0421352
+         age |   .0031203   .0055235     0.56   0.572    -.0077056    .0139461
+        stem |   .1509958   .0914913     1.65   0.099    -.0283239    .3303155
+  goodgrades |   .0412488   .0422496     0.98   0.329    -.0415589    .1240566
+  unemp6more |  -.2994213   .2360476    -1.27   0.205    -.7620661    .1632235
+       _cons |   1.984466   .1770185    11.21   0.000     1.637516    2.331416
+-------------+----------------------------------------------------------------
+employed     |
+      female |  -.2731074   .0695542    -3.93   0.000    -.4094312   -.1367835
+         age |  -.0097986   .0082949    -1.18   0.237    -.0260563    .0064591
+        stem |     .28729   .0781232     3.68   0.000     .1341714    .4404087
+  goodgrades |  -.0723244   .0664129    -1.09   0.276    -.2024913    .0578425
+  unemp6more |  -.6563048   .0689054    -9.52   0.000    -.7913568   -.5212527
+       _cons |   1.541692   .2878968     5.36   0.000     .9774242    2.105959
+-------------+----------------------------------------------------------------
+/mills       |
+      lambda |   .7808919   .8228101     0.95   0.343    -.8317863     2.39357
+-------------+----------------------------------------------------------------
+         rho |    1.00000
+       sigma |  .78089188
+------------------------------------------------------------------------------
+
+. 
+. heckman lnwage female age stem goodgrades  unemp6more , ///
+>                 select(employed = female age stem goodgrades unemp6more) vce(r)
+
+Iteration 0:   log pseudolikelihood = -2212.8678  
+Iteration 1:   log pseudolikelihood = -1950.9752  
+Iteration 2:   log pseudolikelihood = -1910.1821  
+Iteration 3:   log pseudolikelihood =  -1902.346  
+Iteration 4:   log pseudolikelihood = -1901.9469  
+Iteration 5:   log pseudolikelihood = -1901.9331  
+Iteration 6:   log pseudolikelihood =  -1901.933  
+
+Heckman selection model                         Number of obs     =      2,108
+(regression model with sample selection)              Selected    =      1,714
+                                                      Nonselected =        394
+
+                                                Wald chi2(5)      =      57.86
+Log pseudolikelihood = -1901.933                Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+             |               Robust
+             | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+lnwage       |
+      female |  -.0592632   .0220923    -2.68   0.007    -.1025633   -.0159632
+         age |   .0059007   .0029239     2.02   0.044       .00017    .0116314
+        stem |    .074941   .0231632     3.24   0.001     .0295419    .1203401
+  goodgrades |   .0617933   .0206172     3.00   0.003     .0213843    .1022023
+  unemp6more |  -.0837957   .0285139    -2.94   0.003     -.139682   -.0279094
+       _cons |    2.05789   .0998801    20.60   0.000     1.862129    2.253651
+-------------+----------------------------------------------------------------
+employed     |
+      female |  -.2737017   .0704834    -3.88   0.000    -.4118466   -.1355568
+         age |  -.0097668   .0084851    -1.15   0.250    -.0263974    .0068637
+        stem |   .2870011   .0789896     3.63   0.000     .1321844    .4418179
+  goodgrades |  -.0728516   .0658728    -1.11   0.269    -.2019599    .0562567
+  unemp6more |  -.6564217   .0686618    -9.56   0.000    -.7909964    -.521847
+       _cons |   1.541383   .2922402     5.27   0.000     .9686029    2.114163
+-------------+----------------------------------------------------------------
+     /athrho |   .0310278   .0274864     1.13   0.259    -.0228447    .0849002
+    /lnsigma |   -.861404   .0204245   -42.18   0.000    -.9014353   -.8213727
+-------------+----------------------------------------------------------------
+         rho |   .0310178     .02746                     -.0228407    .0846968
+       sigma |   .4225684   .0086307                      .4059865    .4398275
+      lambda |   .0131072   .0116167                     -.0096613    .0358756
+------------------------------------------------------------------------------
+Wald test of indep. eqns. (rho = 0): chi2(1) = 1.27       Prob > chi2 = 0.2590
+
+. 
+. 
+. * IMR is no longer significant and rho is no longer statistically different than 0
+. * we would then wrongly conclude that there is no selection bias in our sample
+.  
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 4\workshop_selection.log
+  log type:  text
+ closed on:  11 Nov 2022, 13:00:46
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

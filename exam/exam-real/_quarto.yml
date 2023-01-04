@@ -1,0 +1,67 @@
+project:
+  type: book
+  output-dir: output
+  execute-dir: project
+
+# knitr:
+#   opts_knit:
+#     root.dir: '/home/emil/Dropbox/data-science/quarto/test-01'  
+#   opts_chunk: 
+#     collapse: true
+
+
+
+book:
+  title: "Appliced Econometrics"
+  subtitle: "Exam"
+  author:
+    - name: Emil Bellamy Begtrup-Bright
+      # url: https://some-website.org
+      affiliation: Department of Organization<br>Copenhagen Business School
+  date: last-modified
+  # site-url: https://some-website.org/rflow
+  # url: https://some-website.org/rflow
+
+
+
+
+
+  # chapters:
+  #   - index.qmd
+  #   - abstract.qmd
+  #   - research_questions.qmd
+  #   - defining-the-population.qmd
+
+  chapters:
+    - index.qmd
+    - qmd/que-1.qmd
+    - qmd/que-2.qmd
+    - qmd/que-3.qmd
+    # - qmd/que-4.qmd
+    # - qmd/references.qmd
+
+
+
+# header-includes:
+#   - \usepackage{float}
+  # - \floatplacement{figure}{H}  #make every figure with caption = h, this was t
+
+
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    number-depth: 2
+    colorlinks: true
+    # lof: true
+    # lot: true
+    # cite-method: biblatex
+    # classoption: [twocolumn, landscape]
+  
+  # html:
+  #   embed-resources: true
+  #   number-sections: true
+  #   number-depth: 2
+  #   lof: true
+
+bibliography: qmd/references.bib

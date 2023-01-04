@@ -1,0 +1,1250 @@
+
+. 
+. use cis3samp.dta, clear
+
+. 
+. ********** MERGING **********
+. * Merge information from the register dataset
+. merge 1:1 id using register.dta
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,100  (_merge==3)
+    -----------------------------------------
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            Matched (3) |      1,100      100.00      100.00
+------------------------+-----------------------------------
+                  Total |      1,100      100.00
+
+. drop _merge
+
+. * Merge information from the exercise3_extra_data dataset
+. merge 1:1 id using exercise3_extra_data.dta
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,100  (_merge==3)
+    -----------------------------------------
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            Matched (3) |      1,100      100.00      100.00
+------------------------+-----------------------------------
+                  Total |      1,100      100.00
+
+. drop _merge
+
+. 
+. ********** GENERATING KEY VARIABLES **********
+. * R&D Intensity = (Internal R&D investment)/(turnover)
+. gen rdint = xinterm/idbrturn
+(572 missing values generated)
+
+. gen rdintpct=rdint*100
+(572 missing values generated)
+
+. * Export Intensity = (Exports volume)/(Turnover)
+. gen expint = export00/idbrturn
+(156 missing values generated)
+
+. * Capital Expenditure Intensity = (Capital Intensity)/(Turnover)
+. gen capint = capex00/idbrturn
+(81 missing values generated)
+
+. * Natual Log of the number of employees in the year 2000
+. gen lempl00 = log(employ00)
+(28 missing values generated)
+
+. 
+. drop if expint > 1
+(183 observations deleted)
+
+. drop if rdint > 1 & rdint != .
+(2 observations deleted)
+
+. 
+. ***EXERCISE 4 - LOGIT & PROBIT ***
+. 
+. * Let us first explore what type of variable PRODINOV is
+. sum prodinov
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    prodinov |        915    .2907104    .4543385          0          1
+
+. tab prodinov
+
+   PRODINOV |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        649       70.93       70.93
+          1 |        266       29.07      100.00
+------------+-----------------------------------
+      Total |        915      100.00
+
+. * PRODINOV is a binary variable. Logit or Probit regressions are appropriate in this case.
+. 
+. // Logit Regression
+. logit prodinov extsource rdintpct inconst lempl00, robust
+
+Iteration 0:   log pseudolikelihood = -299.92202  
+Iteration 1:   log pseudolikelihood = -280.05925  
+Iteration 2:   log pseudolikelihood = -277.45716  
+Iteration 3:   log pseudolikelihood = -277.41171  
+Iteration 4:   log pseudolikelihood = -277.41169  
+
+Logistic regression                                     Number of obs =    434
+                                                        Wald chi2(4)  =  36.47
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -277.41169                       Pseudo R2     = 0.0751
+
+------------------------------------------------------------------------------
+             |               Robust
+    prodinov | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .3583691   .1211101     2.96   0.003     .1209976    .5957406
+    rdintpct |   .1892657   .0670838     2.82   0.005     .0577838    .3207475
+     inconst |  -.0963332   .1153766    -0.83   0.404    -.3224672    .1298008
+     lempl00 |     .28599   .0772687     3.70   0.000     .1345461    .4374338
+       _cons |  -1.396095   .3487893    -4.00   0.000     -2.07971   -.7124807
+------------------------------------------------------------------------------
+
+. 
+. * In a logit (or probit), the size of the coefficients are not directly interpretable.
+. * We can only interpret the sign and the significance of the coefficients.
+. 
+. //// Marginal Effects ////
+> // We can calculate average marinal effects (average partial effects in wooldridge), conditional average marginal effects, and the pred
+> icated probabilities //
+. /// For linear regression (OLS), addigng at means does not change the margianl effects estimated. 
+> // However, in a non linear model (such as logit) it matters!
+. /// Average marginal effects - we interpret:
+> /// One unit (sd) increase in external source, holding all other variables constant, increases the probability for product innovation b
+> y 0.080732 ///
+> margins, dydx(*)
+
+Average marginal effects                                   Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+dy/dx wrt:  extsource rdintpct inconst lempl00
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |    .080732   .0263179     3.07   0.002     .0291498    .1323142
+    rdintpct |    .042637   .0147555     2.89   0.004     .0137167    .0715574
+     inconst |  -.0217016   .0259093    -0.84   0.402    -.0724828    .0290797
+     lempl00 |   .0644267   .0163133     3.95   0.000     .0324532    .0964002
+------------------------------------------------------------------------------
+
+. /// conditional marginal effects - we interpret:
+> // Holding all other variables constant at thier mean, the increase of probability is now 0.0885114 //
+. margins, dydx(*) atmeans 
+
+Conditional marginal effects                               Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+dy/dx wrt:  extsource rdintpct inconst lempl00
+At: extsource = .4163012 (mean)
+    rdintpct  = 1.177587 (mean)
+    inconst   = .1484679 (mean)
+    lempl00   = 4.401899 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .0885114   .0299385     2.96   0.003     .0298329    .1471898
+    rdintpct |   .0467456   .0163636     2.86   0.004     .0146736    .0788175
+     inconst |  -.0237927   .0284931    -0.84   0.404    -.0796381    .0320527
+     lempl00 |   .0706349   .0190752     3.70   0.000     .0332482    .1080216
+------------------------------------------------------------------------------
+
+. marginsplot
+
+Variables that uniquely identify margins: _deriv
+
+. 
+. * linear regression for comparison
+. reg prodinov extsource rdintpct inconst lempl00, robust
+
+Linear regression                               Number of obs     =        434
+                                                F(4, 429)         =      15.29
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0841
+                                                Root MSE          =     .48029
+
+------------------------------------------------------------------------------
+             |               Robust
+    prodinov | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .0896762   .0261317     3.43   0.001     .0383141    .1410383
+    rdintpct |   .0116565   .0028677     4.06   0.000       .00602     .017293
+     inconst |  -.0260107   .0261002    -1.00   0.320    -.0773109    .0252895
+     lempl00 |   .0650598   .0166433     3.91   0.000     .0323472    .0977723
+       _cons |   .1986745   .0752163     2.64   0.009     .0508361    .3465129
+------------------------------------------------------------------------------
+
+. ** We can see that the condtional marginal effects, avrage marginal effects, and OLS estimations are very similar. ** 
+. 
+. logit prodinov extsource rdintpct inconst lempl00, robust
+
+Iteration 0:   log pseudolikelihood = -299.92202  
+Iteration 1:   log pseudolikelihood = -280.05925  
+Iteration 2:   log pseudolikelihood = -277.45716  
+Iteration 3:   log pseudolikelihood = -277.41171  
+Iteration 4:   log pseudolikelihood = -277.41169  
+
+Logistic regression                                     Number of obs =    434
+                                                        Wald chi2(4)  =  36.47
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -277.41169                       Pseudo R2     = 0.0751
+
+------------------------------------------------------------------------------
+             |               Robust
+    prodinov | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .3583691   .1211101     2.96   0.003     .1209976    .5957406
+    rdintpct |   .1892657   .0670838     2.82   0.005     .0577838    .3207475
+     inconst |  -.0963332   .1153766    -0.83   0.404    -.3224672    .1298008
+     lempl00 |     .28599   .0772687     3.70   0.000     .1345461    .4374338
+       _cons |  -1.396095   .3487893    -4.00   0.000     -2.07971   -.7124807
+------------------------------------------------------------------------------
+
+. ** predicted probabilities
+. ** the probability that a firm is product innovating, when all regressors are set at their means is 0.5549194**
+. margins, atmeans predict()
+
+Adjusted predictions                                       Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+At: extsource = .4163012 (mean)
+    rdintpct  = 1.177587 (mean)
+    inconst   = .1484679 (mean)
+    lempl00   = 4.401899 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   .5549194   .0271021    20.48   0.000     .5018002    .6080386
+------------------------------------------------------------------------------
+
+. ** Change in predicted probabilities on diffrent levels of rdintpct **
+. margins,  predict() at(rdintpct = (0(2)70))
+
+Predictive margins                                         Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+1._at:  rdintpct =  0
+2._at:  rdintpct =  2
+3._at:  rdintpct =  4
+4._at:  rdintpct =  6
+5._at:  rdintpct =  8
+6._at:  rdintpct = 10
+7._at:  rdintpct = 12
+8._at:  rdintpct = 14
+9._at:  rdintpct = 16
+10._at: rdintpct = 18
+11._at: rdintpct = 20
+12._at: rdintpct = 22
+13._at: rdintpct = 24
+14._at: rdintpct = 26
+15._at: rdintpct = 28
+16._at: rdintpct = 30
+17._at: rdintpct = 32
+18._at: rdintpct = 34
+19._at: rdintpct = 36
+20._at: rdintpct = 38
+21._at: rdintpct = 40
+22._at: rdintpct = 42
+23._at: rdintpct = 44
+24._at: rdintpct = 46
+25._at: rdintpct = 48
+26._at: rdintpct = 50
+27._at: rdintpct = 52
+28._at: rdintpct = 54
+29._at: rdintpct = 56
+30._at: rdintpct = 58
+31._at: rdintpct = 60
+32._at: rdintpct = 62
+33._at: rdintpct = 64
+34._at: rdintpct = 66
+35._at: rdintpct = 68
+36._at: rdintpct = 70
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         _at |
+          1  |   .4990502   .0252985    19.73   0.000     .4494662    .5486343
+          2  |   .5867454   .0320162    18.33   0.000     .5239948    .6494961
+          3  |   .6695795   .0530338    12.63   0.000     .5656352    .7735237
+          4  |   .7435354   .0692342    10.74   0.000     .6078388    .8792319
+          5  |   .8062069   .0769171    10.48   0.000     .6554523    .9569616
+          6  |   .8569096   .0766363    11.18   0.000     .7067053    1.007114
+          7  |   .8963402   .0706056    12.70   0.000     .7579557    1.034725
+          8  |    .926029   .0613758    15.09   0.000     .8057347    1.046323
+          9  |   .9478202   .0510701    18.56   0.000     .8477245    1.047916
+         10  |   .9635062   .0411131    23.44   0.000      .882926    1.044086
+         11  |   .9746355   .0322769    30.20   0.000      .911374    1.037897
+         12  |   .9824492   .0248584    39.52   0.000     .9337276    1.031171
+         13  |   .9878941   .0188639    52.37   0.000     .9509214    1.024867
+         14  |   .9916681   .0141507    70.08   0.000     .9639332    1.019403
+         15  |   .9942744   .0105185    94.53   0.000     .9736584     1.01489
+         16  |   .9960695   .0077613   128.34   0.000     .9808576    1.011281
+         17  |   .9973038   .0056925   175.19   0.000     .9861467    1.008461
+         18  |   .9981515   .0041543   240.27   0.000     .9900091    1.006294
+         19  |    .998733    .003019   330.82   0.000     .9928159     1.00465
+         20  |   .9991318    .002186   457.06   0.000     .9948474    1.003416
+         21  |   .9994052   .0015778   633.41   0.000     .9963127    1.002498
+         22  |   .9995926   .0011357   880.14   0.000     .9973666    1.001819
+         23  |   .9997209   .0008155  1225.93   0.000     .9981226    1.001319
+         24  |   .9998088   .0005842  1711.29   0.000     .9986637    1.000954
+         25  |   .9998691   .0004177  2393.50   0.000     .9990503    1.000688
+         26  |   .9999103   .0002982  3353.69   0.000      .999326    1.000495
+         27  |   .9999386   .0002124  4706.82   0.000     .9995222    1.000355
+         28  |   .9999579   .0001511  6615.93   0.000     .9996617    1.000254
+         29  |   .9999712   .0001074  9312.43   0.000     .9997607    1.000182
+         30  |   .9999803   .0000762  1.3e+04   0.000     .9998309     1.00013
+         31  |   .9999865    .000054  1.9e+04   0.000     .9998807    1.000092
+         32  |   .9999907   .0000382  2.6e+04   0.000     .9999158    1.000066
+         33  |   .9999937    .000027  3.7e+04   0.000     .9999407    1.000047
+         34  |   .9999957   .0000191  5.2e+04   0.000     .9999582    1.000033
+         35  |    .999997   .0000135  7.4e+04   0.000     .9999706    1.000023
+         36  |    .999998   9.50e-06  1.1e+05   0.000     .9999793    1.000017
+------------------------------------------------------------------------------
+
+. marginsplot 
+
+Variables that uniquely identify margins: rdintpct
+
+. 
+. /*
+> * extra 
+> * what would the default give us?
+> margins, predict()
+> * calculate directly from post-estimates from logit
+> predict y1prob, pr
+> count if y1prob != .
+> su y1prob
+> */
+. 
+. 
+. // Probit regression
+. probit prodinov extsource rdintpct inconst lempl00, robust
+
+Iteration 0:   log pseudolikelihood = -299.92202  
+Iteration 1:   log pseudolikelihood = -279.85941  
+Iteration 2:   log pseudolikelihood = -277.33551  
+Iteration 3:   log pseudolikelihood = -277.29206  
+Iteration 4:   log pseudolikelihood = -277.29206  
+
+Probit regression                                       Number of obs =    434
+                                                        Wald chi2(4)  =  39.74
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -277.29206                       Pseudo R2     = 0.0755
+
+------------------------------------------------------------------------------
+             |               Robust
+    prodinov | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .2233121   .0745664     2.99   0.003     .0771647    .3694595
+    rdintpct |   .1143332    .037344     3.06   0.002     .0411403    .1875261
+     inconst |  -.0593936   .0714343    -0.83   0.406    -.1994024    .0806151
+     lempl00 |    .176137   .0466772     3.77   0.000     .0846513    .2676226
+       _cons |  -.8617537   .2113653    -4.08   0.000    -1.276022   -.4474853
+------------------------------------------------------------------------------
+Note: 0 failures and 2 successes completely determined.
+
+. * Note that the coefficients in the logit are (approx) 1.6 times higher than in the probit.
+. 
+. //// Marginal Effects ////
+> margins, dydx(*)
+
+Average marginal effects                                   Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+dy/dx wrt:  extsource rdintpct inconst lempl00
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .0816164     .02644     3.09   0.002     .0297949    .1334378
+    rdintpct |   .0417866    .013336     3.13   0.002     .0156485    .0679248
+     inconst |  -.0217073   .0260416    -0.83   0.405    -.0727479    .0293334
+     lempl00 |   .0643748    .016189     3.98   0.000     .0326449    .0961046
+------------------------------------------------------------------------------
+
+. margins, dydx(*) atmeans 
+
+Conditional marginal effects                               Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+dy/dx wrt:  extsource rdintpct inconst lempl00
+At: extsource = .4163012 (mean)
+    rdintpct  = 1.177587 (mean)
+    inconst   = .1484679 (mean)
+    lempl00   = 4.401899 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   .0883116   .0295063     2.99   0.003     .0304803    .1461428
+    rdintpct |   .0452145   .0146499     3.09   0.002     .0165013    .0739277
+     inconst |  -.0234879   .0282483    -0.83   0.406    -.0788536    .0318777
+     lempl00 |   .0696556   .0184546     3.77   0.000     .0334853    .1058258
+------------------------------------------------------------------------------
+
+. 
+. ** predicted probabilities
+. margins, atmeans predict()
+
+Adjusted predictions                                       Number of obs = 434
+Model VCE: Robust
+
+Expression: Pr(prodinov), predict()
+At: extsource = .4163012 (mean)
+    rdintpct  = 1.177587 (mean)
+    inconst   = .1484679 (mean)
+    lempl00   = 4.401899 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   .5526532   .0259822    21.27   0.000     .5017291    .6035773
+------------------------------------------------------------------------------
+
+. 
+. * Note that marginal effects are roughly the same as the ones obtained from the Logit.
+. 
+. 
+. 
+. * EXERCISE 5: COUNT MODELS
+. 
+. // Checking the dependent variable (patapply) 
+. sum patapply, detail
+
+                          PATAPPLY
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0             -1
+ 5%            0              0
+10%            0              0       Obs                 808
+25%            0              0       Sum of wgt.         808
+
+50%            0                      Mean           .9740099
+                        Largest       Std. dev.      7.802746
+75%            0             21
+90%            1             50       Variance       60.88284
+95%            4             67       Skewness       20.27983
+99%           20            195       Kurtosis       483.0028
+
+. tabstat patapply, stats(mean sd v n) 
+
+    Variable |      Mean        SD  Variance         N
+-------------+----------------------------------------
+    patapply |  .9740099  7.802746  60.88284       808
+------------------------------------------------------
+
+. histogram patapply, discrete freq 
+(start=-1, width=1)
+
+. histogram patapply if patapply < 100, discrete freq 
+(start=-1, width=1)
+
+. histogram patapply if patapply < 20, discrete freq 
+(start=-1, width=1)
+
+. 
+. /* There seem to be some negative values (which makes no sense). 
+> we can set them to missing values */
+. tab patapply if patapply==-1
+
+   PATAPPLY |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         -1 |          1      100.00      100.00
+------------+-----------------------------------
+      Total |          1      100.00
+
+. 
+. replace patapply=. if patapply==-1
+(1 real change made, 1 to missing)
+
+. tab patapply
+
+   PATAPPLY |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        699       86.62       86.62
+          1 |         31        3.84       90.46
+          2 |         27        3.35       93.80
+          3 |          7        0.87       94.67
+          4 |         11        1.36       96.03
+          5 |          5        0.62       96.65
+          6 |          2        0.25       96.90
+          7 |          2        0.25       97.15
+          8 |          1        0.12       97.27
+         10 |         10        1.24       98.51
+         15 |          2        0.25       98.76
+         16 |          1        0.12       98.88
+         20 |          5        0.62       99.50
+         21 |          1        0.12       99.63
+         50 |          1        0.12       99.75
+         67 |          1        0.12       99.88
+        195 |          1        0.12      100.00
+------------+-----------------------------------
+      Total |        807      100.00
+
+. 
+. tab market /* It is a categorical variable (include it with the i. prefix in the regression) */
+
+     MARKET |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        127       14.08       14.08
+          2 |        128       14.19       28.27
+          3 |        481       53.33       81.60
+          4 |        166       18.40      100.00
+------------+-----------------------------------
+      Total |        902      100.00
+
+. 
+. // Poisson model 
+. poisson patapply lempl00 rdintpct i.pcoop i.market, robust
+
+Iteration 0:   log pseudolikelihood = -9151.1088  
+Iteration 1:   log pseudolikelihood = -3243.3527  (backed up)
+Iteration 2:   log pseudolikelihood = -3137.0743  (backed up)
+Iteration 3:   log pseudolikelihood = -3064.6841  
+Iteration 4:   log pseudolikelihood = -1888.1599  
+Iteration 5:   log pseudolikelihood = -1310.5562  
+Iteration 6:   log pseudolikelihood = -1288.1586  
+Iteration 7:   log pseudolikelihood = -1287.6696  
+Iteration 8:   log pseudolikelihood = -1287.6694  
+Iteration 9:   log pseudolikelihood = -1287.6694  
+
+Poisson regression                                      Number of obs =    415
+                                                        Wald chi2(6)  = 343.23
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -1287.6694                       Pseudo R2     = 0.3789
+
+------------------------------------------------------------------------------
+             |               Robust
+    patapply | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     lempl00 |   .7186212   .2390755     3.01   0.003     .2500418    1.187201
+    rdintpct |   .0406542   .0056285     7.22   0.000     .0296226    .0516857
+     1.pcoop |   1.192234   .5165295     2.31   0.021     .1798552    2.204614
+             |
+      market |
+          2  |  -.0625856   1.182245    -0.05   0.958    -2.379744    2.254573
+          3  |   2.083321   1.034631     2.01   0.044     .0554822     4.11116
+          4  |   1.804567   1.281473     1.41   0.159    -.7070738    4.316208
+             |
+       _cons |  -5.728902   1.528863    -3.75   0.000    -8.725419   -2.732385
+------------------------------------------------------------------------------
+
+. // Interpret coefficients: 
+. // (1) If a company was to start cooperating (pccop==1), the expected counts of patents would multiply by a factor of exp(1.192) = 3.29
+>  (= the IRR of that coefficient). This is an increase of 100*(exp(1.192)-1) = 229 per cent, while holding the other variables in the mo
+> del constant.//
+. // (2) Employment enters the model in logs, so the coefficient 0.719 is the elasticity of the expected number of patents with respect t
+> o employment. This means that for a one percent change in employment, we would expect to see a 0.719 percent change in the number of pa
+> tents, all else equal. This approximation is valid for small changes.
+. // (3) rdintpct is a continuous variable. Following an increase of one percentage point in R&D investment relative to turnover, the num
+> ber of expected patents would multiply by a factor of approximately exp(0.04)=1.04 (=IRR). That is, an increase of approx. 100*0.04=4 p
+> er cent while holding the other variables in the model constant //
+. // (4) When interpreting Market, we need to remember that the base category is the local market (market==1) therefore, let's interpret 
+> the coefficient  market==3: relative to firms who operate in the local market, the expected counts of patents applications would multip
+> ly by a factor of exp(2.08) =  8.03 (= the IRR of that coefficient). This is a huge increase of 100*(exp(2.08)-1) = 703 per cent, while
+>  holding the other variables in the model constant.//
+. 
+. poisson, irr 
+
+Poisson regression                                      Number of obs =    415
+                                                        Wald chi2(6)  = 343.23
+                                                        Prob > chi2   = 0.0000
+Log pseudolikelihood = -1287.6694                       Pseudo R2     = 0.3789
+
+------------------------------------------------------------------------------
+             |               Robust
+    patapply |        IRR   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     lempl00 |   2.051602   .4904879     3.01   0.003     1.284079    3.277892
+    rdintpct |   1.041492    .005862     7.22   0.000     1.030066    1.053045
+     1.pcoop |   3.294434   1.701673     2.31   0.021     1.197044    9.066749
+             |
+      market |
+          2  |   .9393326   1.110522    -0.05   0.958     .0925743    9.531219
+          3  |   8.031096   8.309218     2.01   0.044      1.05705    61.01744
+          4  |    6.07734   7.787946     1.41   0.159     .4930849    74.90405
+             |
+       _cons |   .0032506   .0049698    -3.75   0.000     .0001624     .065064
+------------------------------------------------------------------------------
+Note: _cons estimates baseline incidence rate.
+
+. // IRR (incidence-rate ratios) gives you the multiplier that applies to the expected value of the DV if the IV is increased by one unit
+>  (or from zero to one, in the case of a dummy)
+. // While the interpretation also applies for log transformed variables, meaning a one log-unit increase (for example, from n=10 to n=27
+>  employees (ln(27)-ln(10) is approx. equal to 1), for those variables, the elasticity interpretation is more straightforward.
+. 
+. 
+. // Expected number of patents for a firm with average values on all variables
+. margins, atmeans
+
+Adjusted predictions                                       Number of obs = 415
+Model VCE: Robust
+
+Expression: Predicted number of events, predict()
+At: lempl00  = 4.393909 (mean)
+    rdintpct =  1.14198 (mean)
+    0.pcoop  =  .746988 (mean)
+    1.pcoop  =  .253012 (mean)
+    1.market = .0698795 (mean)
+    2.market = .1180723 (mean)
+    3.market = .5542169 (mean)
+    4.market = .2578313 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   .5429304     .18578     2.92   0.003     .1788083    .9070526
+------------------------------------------------------------------------------
+
+. margins, atmeans at (pcoop=1 market=3 rdintpct=(0(1)70)) predict()
+
+Adjusted predictions                                       Number of obs = 415
+Model VCE: Robust
+
+Expression: Predicted number of events, predict()
+1._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        0
+        pcoop    =        1
+        market   =        3
+2._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        1
+        pcoop    =        1
+        market   =        3
+3._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        2
+        pcoop    =        1
+        market   =        3
+4._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        3
+        pcoop    =        1
+        market   =        3
+5._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        4
+        pcoop    =        1
+        market   =        3
+6._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        5
+        pcoop    =        1
+        market   =        3
+7._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        6
+        pcoop    =        1
+        market   =        3
+8._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        7
+        pcoop    =        1
+        market   =        3
+9._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        8
+        pcoop    =        1
+        market   =        3
+10._at: lempl00  = 4.393909 (mean)
+        rdintpct =        9
+        pcoop    =        1
+        market   =        3
+11._at: lempl00  = 4.393909 (mean)
+        rdintpct =       10
+        pcoop    =        1
+        market   =        3
+12._at: lempl00  = 4.393909 (mean)
+        rdintpct =       11
+        pcoop    =        1
+        market   =        3
+13._at: lempl00  = 4.393909 (mean)
+        rdintpct =       12
+        pcoop    =        1
+        market   =        3
+14._at: lempl00  = 4.393909 (mean)
+        rdintpct =       13
+        pcoop    =        1
+        market   =        3
+15._at: lempl00  = 4.393909 (mean)
+        rdintpct =       14
+        pcoop    =        1
+        market   =        3
+16._at: lempl00  = 4.393909 (mean)
+        rdintpct =       15
+        pcoop    =        1
+        market   =        3
+17._at: lempl00  = 4.393909 (mean)
+        rdintpct =       16
+        pcoop    =        1
+        market   =        3
+18._at: lempl00  = 4.393909 (mean)
+        rdintpct =       17
+        pcoop    =        1
+        market   =        3
+19._at: lempl00  = 4.393909 (mean)
+        rdintpct =       18
+        pcoop    =        1
+        market   =        3
+20._at: lempl00  = 4.393909 (mean)
+        rdintpct =       19
+        pcoop    =        1
+        market   =        3
+21._at: lempl00  = 4.393909 (mean)
+        rdintpct =       20
+        pcoop    =        1
+        market   =        3
+22._at: lempl00  = 4.393909 (mean)
+        rdintpct =       21
+        pcoop    =        1
+        market   =        3
+23._at: lempl00  = 4.393909 (mean)
+        rdintpct =       22
+        pcoop    =        1
+        market   =        3
+24._at: lempl00  = 4.393909 (mean)
+        rdintpct =       23
+        pcoop    =        1
+        market   =        3
+25._at: lempl00  = 4.393909 (mean)
+        rdintpct =       24
+        pcoop    =        1
+        market   =        3
+26._at: lempl00  = 4.393909 (mean)
+        rdintpct =       25
+        pcoop    =        1
+        market   =        3
+27._at: lempl00  = 4.393909 (mean)
+        rdintpct =       26
+        pcoop    =        1
+        market   =        3
+28._at: lempl00  = 4.393909 (mean)
+        rdintpct =       27
+        pcoop    =        1
+        market   =        3
+29._at: lempl00  = 4.393909 (mean)
+        rdintpct =       28
+        pcoop    =        1
+        market   =        3
+30._at: lempl00  = 4.393909 (mean)
+        rdintpct =       29
+        pcoop    =        1
+        market   =        3
+31._at: lempl00  = 4.393909 (mean)
+        rdintpct =       30
+        pcoop    =        1
+        market   =        3
+32._at: lempl00  = 4.393909 (mean)
+        rdintpct =       31
+        pcoop    =        1
+        market   =        3
+33._at: lempl00  = 4.393909 (mean)
+        rdintpct =       32
+        pcoop    =        1
+        market   =        3
+34._at: lempl00  = 4.393909 (mean)
+        rdintpct =       33
+        pcoop    =        1
+        market   =        3
+35._at: lempl00  = 4.393909 (mean)
+        rdintpct =       34
+        pcoop    =        1
+        market   =        3
+36._at: lempl00  = 4.393909 (mean)
+        rdintpct =       35
+        pcoop    =        1
+        market   =        3
+37._at: lempl00  = 4.393909 (mean)
+        rdintpct =       36
+        pcoop    =        1
+        market   =        3
+38._at: lempl00  = 4.393909 (mean)
+        rdintpct =       37
+        pcoop    =        1
+        market   =        3
+39._at: lempl00  = 4.393909 (mean)
+        rdintpct =       38
+        pcoop    =        1
+        market   =        3
+40._at: lempl00  = 4.393909 (mean)
+        rdintpct =       39
+        pcoop    =        1
+        market   =        3
+41._at: lempl00  = 4.393909 (mean)
+        rdintpct =       40
+        pcoop    =        1
+        market   =        3
+42._at: lempl00  = 4.393909 (mean)
+        rdintpct =       41
+        pcoop    =        1
+        market   =        3
+43._at: lempl00  = 4.393909 (mean)
+        rdintpct =       42
+        pcoop    =        1
+        market   =        3
+44._at: lempl00  = 4.393909 (mean)
+        rdintpct =       43
+        pcoop    =        1
+        market   =        3
+45._at: lempl00  = 4.393909 (mean)
+        rdintpct =       44
+        pcoop    =        1
+        market   =        3
+46._at: lempl00  = 4.393909 (mean)
+        rdintpct =       45
+        pcoop    =        1
+        market   =        3
+47._at: lempl00  = 4.393909 (mean)
+        rdintpct =       46
+        pcoop    =        1
+        market   =        3
+48._at: lempl00  = 4.393909 (mean)
+        rdintpct =       47
+        pcoop    =        1
+        market   =        3
+49._at: lempl00  = 4.393909 (mean)
+        rdintpct =       48
+        pcoop    =        1
+        market   =        3
+50._at: lempl00  = 4.393909 (mean)
+        rdintpct =       49
+        pcoop    =        1
+        market   =        3
+51._at: lempl00  = 4.393909 (mean)
+        rdintpct =       50
+        pcoop    =        1
+        market   =        3
+52._at: lempl00  = 4.393909 (mean)
+        rdintpct =       51
+        pcoop    =        1
+        market   =        3
+53._at: lempl00  = 4.393909 (mean)
+        rdintpct =       52
+        pcoop    =        1
+        market   =        3
+54._at: lempl00  = 4.393909 (mean)
+        rdintpct =       53
+        pcoop    =        1
+        market   =        3
+55._at: lempl00  = 4.393909 (mean)
+        rdintpct =       54
+        pcoop    =        1
+        market   =        3
+56._at: lempl00  = 4.393909 (mean)
+        rdintpct =       55
+        pcoop    =        1
+        market   =        3
+57._at: lempl00  = 4.393909 (mean)
+        rdintpct =       56
+        pcoop    =        1
+        market   =        3
+58._at: lempl00  = 4.393909 (mean)
+        rdintpct =       57
+        pcoop    =        1
+        market   =        3
+59._at: lempl00  = 4.393909 (mean)
+        rdintpct =       58
+        pcoop    =        1
+        market   =        3
+60._at: lempl00  = 4.393909 (mean)
+        rdintpct =       59
+        pcoop    =        1
+        market   =        3
+61._at: lempl00  = 4.393909 (mean)
+        rdintpct =       60
+        pcoop    =        1
+        market   =        3
+62._at: lempl00  = 4.393909 (mean)
+        rdintpct =       61
+        pcoop    =        1
+        market   =        3
+63._at: lempl00  = 4.393909 (mean)
+        rdintpct =       62
+        pcoop    =        1
+        market   =        3
+64._at: lempl00  = 4.393909 (mean)
+        rdintpct =       63
+        pcoop    =        1
+        market   =        3
+65._at: lempl00  = 4.393909 (mean)
+        rdintpct =       64
+        pcoop    =        1
+        market   =        3
+66._at: lempl00  = 4.393909 (mean)
+        rdintpct =       65
+        pcoop    =        1
+        market   =        3
+67._at: lempl00  = 4.393909 (mean)
+        rdintpct =       66
+        pcoop    =        1
+        market   =        3
+68._at: lempl00  = 4.393909 (mean)
+        rdintpct =       67
+        pcoop    =        1
+        market   =        3
+69._at: lempl00  = 4.393909 (mean)
+        rdintpct =       68
+        pcoop    =        1
+        market   =        3
+70._at: lempl00  = 4.393909 (mean)
+        rdintpct =       69
+        pcoop    =        1
+        market   =        3
+71._at: lempl00  = 4.393909 (mean)
+        rdintpct =       70
+        pcoop    =        1
+        market   =        3
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         _at |
+          1  |   2.022248   .6576473     3.07   0.002     .7332826    3.311212
+          2  |   2.106154   .6894496     3.05   0.002      .754858    3.457451
+          3  |   2.193543    .722939     3.03   0.002     .7766081    3.610477
+          4  |   2.284557   .7582046     3.01   0.003     .7985029     3.77061
+          5  |   2.379347   .7953397     2.99   0.003     .8205099    3.938184
+          6  |   2.478071   .8344424     2.97   0.003     .8425936    4.113548
+          7  |    2.58089   .8756157     2.95   0.003     .8647152    4.297066
+          8  |   2.687976   .9189675     2.92   0.003     .8868331    4.489119
+          9  |   2.799505   .9646114     2.90   0.004     .9089019    4.690109
+         10  |   2.915662   1.012666     2.88   0.004     .9308725    4.900452
+         11  |   3.036638   1.063257     2.86   0.004     .9526921    5.120584
+         12  |   3.162634   1.116516     2.83   0.005     .9743034    5.350965
+         13  |   3.293858   1.172579     2.81   0.005      .995645     5.59207
+         14  |   3.430526   1.231592     2.79   0.005     1.016651    5.844401
+         15  |   3.572865   1.293705     2.76   0.006     1.037249     6.10848
+         16  |   3.721109   1.359079     2.74   0.006     1.057363    6.384856
+         17  |   3.875505    1.42788     2.71   0.007     1.076912    6.674099
+         18  |   4.036307   1.500283     2.69   0.007     1.095806    6.976808
+         19  |   4.203781   1.576472     2.67   0.008     1.113952     7.29361
+         20  |   4.378203   1.656641     2.64   0.008     1.131247     7.62516
+         21  |   4.559863    1.74099     2.62   0.009     1.147585    7.972141
+         22  |    4.74906   1.829733     2.60   0.009     1.162849    8.335272
+         23  |   4.946108   1.923093     2.57   0.010     1.176915      8.7153
+         24  |   5.151331   2.021302     2.55   0.011     1.189651    9.113011
+         25  |   5.365069   2.124607     2.53   0.012     1.200916    9.529222
+         26  |   5.587676   2.233264     2.50   0.012     1.210559    9.964792
+         27  |   5.819519   2.347542     2.48   0.013      1.21842    10.42062
+         28  |   6.060981   2.467726     2.46   0.014     1.224328    10.89763
+         29  |   6.312462   2.594111     2.43   0.015     1.228099    11.39683
+         30  |   6.574378   2.727008     2.41   0.016     1.229541    11.91922
+         31  |   6.847161   2.866744     2.39   0.017     1.228445    12.46588
+         32  |   7.131263   3.013662     2.37   0.018     1.224593    13.03793
+         33  |   7.427152    3.16812     2.34   0.019     1.217751    13.63655
+         34  |   7.735318   3.330495     2.32   0.020     1.207669    14.26297
+         35  |   8.056271    3.50118     2.30   0.021     1.194083    14.91846
+         36  |    8.39054   3.680591     2.28   0.023     1.176714    15.60437
+         37  |   8.738679   3.869162     2.26   0.024     1.155262     16.3221
+         38  |   9.101263   4.067346     2.24   0.025     1.129412    17.07311
+         39  |   9.478892   4.275621     2.22   0.027     1.098828    17.85896
+         40  |   9.872188   4.494488     2.20   0.028     1.063153    18.68122
+         41  |    10.2818   4.724471     2.18   0.030     1.022011     19.5416
+         42  |   10.70841   4.966119     2.16   0.031     .9750005    20.44183
+         43  |   11.15273   5.220009     2.14   0.033     .9216976    21.38376
+         44  |   11.61547   5.486744     2.12   0.034     .8616526     22.3693
+         45  |   12.09742   5.766959     2.10   0.036     .7943896    23.40045
+         46  |   12.59937   6.061316     2.08   0.038     .7194041    24.47933
+         47  |   13.12214   6.370512     2.06   0.039     .6361625    25.60811
+         48  |    13.6666   6.695275     2.04   0.041     .5440998     26.7891
+         49  |   14.23365   7.036371     2.02   0.043      .442618    28.02468
+         50  |   14.82423   7.394598     2.00   0.045     .3310848    29.31738
+         51  |   15.43932   7.770798     1.99   0.047     .2088312     30.6698
+         52  |   16.07992    8.16585     1.97   0.049     .0751499    32.08469
+         53  |   16.74711   8.580675     1.95   0.051     -.070707    33.56492
+         54  |   17.44198    9.01624     1.93   0.053    -.2295297    35.11348
+         55  |   18.16568   9.473556     1.92   0.055    -.4021536     36.7335
+         56  |    18.9194   9.953685     1.90   0.057     -.589461    38.42827
+         57  |    19.7044   10.45774     1.88   0.060    -.7923843    40.20119
+         58  |   20.52198   10.98688     1.87   0.062    -1.011908    42.05586
+         59  |   21.37347   11.54233     1.85   0.064    -1.249071    43.99601
+         60  |    22.2603   12.12536     1.84   0.066    -1.504972    46.02556
+         61  |   23.18392   12.73732     1.82   0.069    -1.780768     48.1486
+         62  |   24.14586    13.3796     1.80   0.071    -2.077683     50.3694
+         63  |   25.14772   14.05369     1.79   0.074    -2.397007    52.69244
+         64  |   26.19114   14.76111     1.77   0.076      -2.7401    55.12238
+         65  |   27.27786   15.50348     1.76   0.078      -3.1084    57.66412
+         66  |   28.40967   16.28249     1.74   0.081    -3.503419    60.32276
+         67  |   29.58844    17.0999     1.73   0.084    -3.926755    63.10363
+         68  |   30.81612   17.95758     1.72   0.086    -4.380091    66.01233
+         69  |   32.09474   18.85746     1.70   0.089    -4.865204    69.05468
+         70  |   33.42641   19.80157     1.69   0.091    -5.383964    72.23677
+         71  |   34.81333   20.79205     1.67   0.094    -5.938342      75.565
+------------------------------------------------------------------------------
+
+. marginsplot
+
+Variables that uniquely identify margins: rdintpct
+
+. 
+. *** EXTRA: If you want to look at how the number of expected patents at different levels of R&D investment differ between markets run t
+> he next two lines ***  
+. margins, atmeans at (pcoop=1 rdintpct=(0(10)40) market=(1 2 3 4)) predict()
+
+Adjusted predictions                                       Number of obs = 415
+Model VCE: Robust
+
+Expression: Predicted number of events, predict()
+1._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        0
+        pcoop    =        1
+        market   =        1
+2._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        0
+        pcoop    =        1
+        market   =        2
+3._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        0
+        pcoop    =        1
+        market   =        3
+4._at:  lempl00  = 4.393909 (mean)
+        rdintpct =        0
+        pcoop    =        1
+        market   =        4
+5._at:  lempl00  = 4.393909 (mean)
+        rdintpct =       10
+        pcoop    =        1
+        market   =        1
+6._at:  lempl00  = 4.393909 (mean)
+        rdintpct =       10
+        pcoop    =        1
+        market   =        2
+7._at:  lempl00  = 4.393909 (mean)
+        rdintpct =       10
+        pcoop    =        1
+        market   =        3
+8._at:  lempl00  = 4.393909 (mean)
+        rdintpct =       10
+        pcoop    =        1
+        market   =        4
+9._at:  lempl00  = 4.393909 (mean)
+        rdintpct =       20
+        pcoop    =        1
+        market   =        1
+10._at: lempl00  = 4.393909 (mean)
+        rdintpct =       20
+        pcoop    =        1
+        market   =        2
+11._at: lempl00  = 4.393909 (mean)
+        rdintpct =       20
+        pcoop    =        1
+        market   =        3
+12._at: lempl00  = 4.393909 (mean)
+        rdintpct =       20
+        pcoop    =        1
+        market   =        4
+13._at: lempl00  = 4.393909 (mean)
+        rdintpct =       30
+        pcoop    =        1
+        market   =        1
+14._at: lempl00  = 4.393909 (mean)
+        rdintpct =       30
+        pcoop    =        1
+        market   =        2
+15._at: lempl00  = 4.393909 (mean)
+        rdintpct =       30
+        pcoop    =        1
+        market   =        3
+16._at: lempl00  = 4.393909 (mean)
+        rdintpct =       30
+        pcoop    =        1
+        market   =        4
+17._at: lempl00  = 4.393909 (mean)
+        rdintpct =       40
+        pcoop    =        1
+        market   =        1
+18._at: lempl00  = 4.393909 (mean)
+        rdintpct =       40
+        pcoop    =        1
+        market   =        2
+19._at: lempl00  = 4.393909 (mean)
+        rdintpct =       40
+        pcoop    =        1
+        market   =        3
+20._at: lempl00  = 4.393909 (mean)
+        rdintpct =       40
+        pcoop    =        1
+        market   =        4
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         _at |
+          1  |   .2518022   .2715516     0.93   0.354    -.2804292    .7840335
+          2  |    .236526   .1405599     1.68   0.092    -.0389664    .5120184
+          3  |   2.022248   .6576473     3.07   0.002     .7332826    3.311212
+          4  |   1.530287   .7002848     2.19   0.029     .1577545     2.90282
+          5  |   .3781101   .4117345     0.92   0.358    -.4288746    1.185095
+          6  |   .3551711   .2141916     1.66   0.097    -.0646366    .7749789
+          7  |   3.036638   1.063257     2.86   0.004     .9526921    5.120584
+          8  |   2.297903   .9598823     2.39   0.017     .4165687    4.179238
+          9  |    .567776    .625803     0.91   0.364    -.6587753    1.794327
+         10  |   .5333305   .3290081     1.62   0.105    -.1115136    1.178175
+         11  |   4.559863    1.74099     2.62   0.009     1.147585    7.972141
+         12  |   3.450567   1.318029     2.62   0.009     .8672782    6.033857
+         13  |   .8525812   .9533158     0.89   0.371    -1.015883    2.721046
+         14  |   .8008573   .5088834     1.57   0.116    -.1965359    1.798251
+         15  |   6.847161   2.866744     2.39   0.017     1.228445    12.46588
+         16  |   5.181426   1.822023     2.84   0.004     1.610327    8.752525
+         17  |   1.280249   1.455221     0.88   0.379    -1.571932    4.132431
+         18  |    1.20258   .7916081     1.52   0.129    -.3489435    2.754103
+         19  |    10.2818   4.724471     2.18   0.030     1.022011     19.5416
+         20  |   7.780509   2.553855     3.05   0.002     2.775046    12.78597
+------------------------------------------------------------------------------
+
+. marginsplot
+
+Variables that uniquely identify margins: rdintpct market
+
+. 
+. 
+. 
+. // Negative Binomial model
+. nbreg patapply lempl00 rdintpc i.pcoop i.market
+
+Fitting Poisson model:
+
+Iteration 0:   log likelihood = -9151.1088  
+Iteration 1:   log likelihood = -3243.3527  (backed up)
+Iteration 2:   log likelihood = -3137.0743  (backed up)
+Iteration 3:   log likelihood = -3064.6841  
+Iteration 4:   log likelihood = -1888.1599  
+Iteration 5:   log likelihood = -1310.5562  
+Iteration 6:   log likelihood = -1288.1586  
+Iteration 7:   log likelihood = -1287.6696  
+Iteration 8:   log likelihood = -1287.6694  
+Iteration 9:   log likelihood = -1287.6694  
+
+Fitting constant-only model:
+
+Iteration 0:   log likelihood = -757.34112  
+Iteration 1:   log likelihood = -494.17225  
+Iteration 2:   log likelihood = -494.16807  
+Iteration 3:   log likelihood = -494.16807  
+
+Fitting full model:
+
+Iteration 0:   log likelihood = -475.18145  
+Iteration 1:   log likelihood = -454.54378  
+Iteration 2:   log likelihood = -450.52876  
+Iteration 3:   log likelihood = -450.37192  
+Iteration 4:   log likelihood = -450.37124  
+Iteration 5:   log likelihood = -450.37124  
+
+Negative binomial regression                            Number of obs =    415
+                                                        LR chi2(6)    =  87.59
+Dispersion: mean                                        Prob > chi2   = 0.0000
+Log likelihood = -450.37124                             Pseudo R2     = 0.0886
+
+------------------------------------------------------------------------------
+    patapply | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     lempl00 |   .5889835   .1145766     5.14   0.000     .3644174    .8135495
+    rdintpct |   .1493002   .0583457     2.56   0.011     .0349447    .2636557
+     1.pcoop |   .4747599   .3353143     1.42   0.157    -.1824441    1.131964
+             |
+      market |
+          2  |  -.0856054   1.107914    -0.08   0.938    -2.257078    2.085867
+          3  |   1.899004   .9077064     2.09   0.036     .1199326    3.678076
+          4  |     2.3527   .9252438     2.54   0.011     .5392559    4.166145
+             |
+       _cons |  -4.986202    .983554    -5.07   0.000    -6.913932   -3.058471
+-------------+----------------------------------------------------------------
+    /lnalpha |    1.79086   .1369872                       1.52237     2.05935
+-------------+----------------------------------------------------------------
+       alpha |   5.994605   .8211844                      4.583073    7.840871
+------------------------------------------------------------------------------
+LR test of alpha=0: chibar2(01) = 1674.60              Prob >= chibar2 = 0.000
+
+. nbreg, irr
+
+Negative binomial regression                            Number of obs =    415
+                                                        LR chi2(6)    =  87.59
+Dispersion: mean                                        Prob > chi2   = 0.0000
+Log likelihood = -450.37124                             Pseudo R2     = 0.0886
+
+------------------------------------------------------------------------------
+    patapply |        IRR   Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     lempl00 |   1.802156   .2064849     5.14   0.000     1.439675    2.255901
+    rdintpct |   1.161021   .0677406     2.56   0.011     1.035562     1.30168
+     1.pcoop |   1.607628   .5390608     1.42   0.157     .8332312    3.101742
+             |
+      market |
+          2  |   .9179564   1.017017    -0.08   0.938     .1046559    8.051566
+          3  |   6.679241    6.06279     2.09   0.036     1.127421    39.57019
+          4  |   10.51392   9.727942     2.54   0.011      1.71473    64.46645
+             |
+       _cons |   .0068316   .0067192    -5.07   0.000     .0009938    .0469594
+-------------+----------------------------------------------------------------
+    /lnalpha |    1.79086   .1369872                       1.52237     2.05935
+-------------+----------------------------------------------------------------
+       alpha |   5.994605   .8211844                      4.583073    7.840871
+------------------------------------------------------------------------------
+Note: Estimates are transformed only in the first equation to incidence-rate ratios.
+Note: _cons estimates baseline incidence rate.
+LR test of alpha=0: chibar2(01) = 1674.60              Prob >= chibar2 = 0.000
+
+. 
+. //to interpret the coefficients of a Negative Binomial model, we will apply a similar method: (1) exp(beta) for multiplier (=irr). (2) 
+> for dummy variables 100*(exp(beta)-1) (3) for continues variables approx. 100*exp(beta).
+. margins, atmeans
+
+Adjusted predictions                                       Number of obs = 415
+Model VCE: OIM
+
+Expression: Predicted number of events, predict()
+At: lempl00  = 4.393909 (mean)
+    rdintpct =  1.14198 (mean)
+    0.pcoop  =  .746988 (mean)
+    1.pcoop  =  .253012 (mean)
+    1.market = .0698795 (mean)
+    2.market = .1180723 (mean)
+    3.market = .5542169 (mean)
+    4.market = .2578313 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |     Margin   std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       _cons |   .6321102    .099528     6.35   0.000      .437039    .8271815
+------------------------------------------------------------------------------
+
+. 
+. // Remember that Poisson regression with the robust SE is the superior model for when you have an outcome variable with count data.
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 3\statalog.txt
+  log type:  text
+ closed on:   8 Nov 2022, 10:14:45
+-----------------------------------------------------------------------------------------------------------------------------------------

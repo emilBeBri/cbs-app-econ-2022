@@ -1,0 +1,91 @@
+{smcl}
+{com}{sf}{ul off}
+. use 08-diff-in-diff/CK1994.dta, clear
+{err}{p 0 4 2}
+file {bf:{err}08-diff-in-diff/CK1994.dta}
+not found
+{p_end}
+{txt}{search r(601), local:r(601);}
+
+{com}. use 08-diff-in-diff/ck1994.dta, clear
+
+. 
+. * change directory to the relevant one 
+
+. * cd ...
+
+. 
+. cap log using CK1994_example.smcl , replace
+
+. 
+. 
+. use 08-diff-in-diff/ck1994.dta, clear
+
+. 
+. **# GENERATE VARIABLES
+
+. gen treated=state
+
+. lab var treated "NJ = 1; PA = 0"
+
+. lab def treated 1 "NJ" 0 "PA"
+
+. lab value treated treated
+
+. 
+. gen post=time
+
+. lab var post "Feb.92 = 0; Nov. 1992 = 1"
+
+. lab def time 0 "Pre" 2 "Post"
+
+. lab value post post
+
+. 
+. gen id=store
+
+. lab var id "Restaurant ID"
+
+. 
+. gen fte=empft
+{txt}(18 missing values generated)
+
+{com}. lab var fte "Output: Full Time Employees"
+
+. 
+. lab var chain "Burger King = 1; KFC = 2; Roys = 3; Wendy's = 4" 
+
+. lab def chain 1 "Burger King" 2 "KFC" 3 "Roys" 4 "Wendy's" 
+
+. lab value chain chain
+
+. 
+. sort id post
+
+. xtset id post
+{res}
+{col 1}{txt:Panel variable: }{res:id}{txt: (strongly balanced)}
+{p 1 16 2}{txt:Time variable: }{res:post}{txt:, }{res:{bind:0}}{txt: to }{res:{bind:1}}{p_end}
+{txt}{col 10}Delta: {res}1 unit
+
+{com}. 
+. d id treated post fte chain 
+
+{txt}Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+{hline}
+{p 0 48}{res}{bind:id             }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Restaurant ID{p_end}
+{p 0 48}{bind:treated        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:treated  }{bind:  }{res}{res}NJ = 1; PA = 0{p_end}
+{p 0 48}{bind:post           }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:post     }{bind:  }{res}{res}Feb.92 = 0; Nov. 1992 = 1{p_end}
+{p 0 48}{bind:fte            }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Output: Full Time Employees{p_end}
+{p 0 48}{bind:chain          }{txt}{bind: float   }{bind:{txt}%11.0g    }{space 1}{bind:chain    }{bind:  }{res}{res}Burger King = 1; KFC = 2; Roys = 3; Wendy's = 4{p_end}
+
+{com}. 
+. * Drop stores with missing outcomes
+
+. bys id: egen _fte=count(fte)
+
+. drop if _fte!=2
+{txt}(36 observations deleted)
+
+{com}. 

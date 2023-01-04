@@ -1,0 +1,100 @@
+# Question 3
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+source('r/pre-processing.r')
+
+j1  <- f1[edgrp == '4']
+
+``` 
+
+
+#### q3.a
+
+
+I find it to be a relevant critique, since the error term might be correlated to the explanatory variable of PC use - Since the wage gap happening as a process *leading up to* the year 2000*, there is good reason to suspect that the PC has a systematic relation to the error term. 
+
+
+
+
+#### q3.b
+
+The cofficent for this approach is ~ -.5, and it it is signifant at the 5 % level.
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+q3b <- feols(dmfwg28 ~ durmf1980 + nondmf1980 | pcemp_m_c2000 ~ lncs1980 , data = j1, vcov='hetero')
+q3b  %>% etable()
+```
+
+
+#### q3.c 
+
+the relevance is evaluated by calculating the correlation between the instrument and the possible endogeneous variable  and testing for significance. There is a highly signicant result between them. However, somewhat puzzling, there is not between pc use and the wage gap in this educational group, which I included as a check. 
+
+there is however also a signicant but somewhat smaller correlation between the instrument and the wage gap, which is not a good sign. 
+
+
+regressing the instrument and the controls on the pc use variable, we get a signicant result, meaning that the instrument does predict pc use. 
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+
+j1[, .(pcemp_m_c2000, lncs1980, dmfwg28)] %>% dtcor() 
+feols(pcemp_m_c2000 ~ lncs1980 + durmf1980 + nondmf1980, data = j1, vcov='hetero') %>% etable()
+
+
+```
+
+The hauseman test, showing the validity of the IV approach, is also signicant (it's prinited at the end of the output.)
+
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+q3b  
+```
+
+All in all, I conclude that the IV approach seems to be valid, but the correlation between the instrument and the wage gap in the primary model is concerning.
+
+#### q3.d
+
+
+first the IV model, next to the naive ols model and the previous IV model with only one instrument. We see that the parameter of interest looses power, going from -.5 to -.29, and is no longer significant.
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+
+q3b_naive <- feols(dmfwg28 ~ durmf1980 + nondmf1980 + pcemp_m_c2000,  data = j1, vcov='hetero')
+q3e <- feols(dmfwg28 ~ durmf1980 + nondmf1980 | pcemp_m_c2000 ~ lncs1980 +  lnlf1980 + mexish1980 , data = j1, vcov='hetero')
+etable(q3b_naive, q3b, q3e)
+
+
+```
+
+next an overidentification test, which is not significant, meaning the instruments are not valid. 
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+# overidentification test (can only be done with >= 2 instruments)
+j1[, iv_res := resid(q3e)]
+
+mod_overid  <- feols(iv_res ~  lncs1980 +  lnlf1980 + mexish1980 + durmf1980 + nondmf1980   , j1 )
+
+oid <- r2(mod_overid)[['r2']] * nrow(j1) 
+
+# not getting the right chisq value, not sure why 
+pchisq(oid, df= 1)
+
+
+```
+
+#### q3.e
+
+
+
+

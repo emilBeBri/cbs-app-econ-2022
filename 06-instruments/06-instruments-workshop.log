@@ -1,0 +1,1662 @@
+-----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 6\worksho
+> p_IV.log
+  log type:  text
+ opened on:  25 Nov 2022, 15:26:22
+
+. 
+. * open the dataset (available on CANVAS)
+. use mroz.dta
+
+. d
+
+Contains data from mroz.dta
+ Observations:           736                  
+    Variables:            22                  10 Nov 2017 08:36
+-----------------------------------------------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-----------------------------------------------------------------------------------------------------------------------
+inlf            byte    %9.0g                 =1 if in lab frce, 1975
+hours           int     %9.0g                 hours worked, 1975
+kidslt6         byte    %9.0g                 # kids < 6 years
+kidsge6         byte    %9.0g                 # kids 6-18
+age             byte    %9.0g                 woman's age in yrs
+educ            byte    %9.0g                 years of schooling
+wage            float   %9.0g                 est. wage from earn, hrs
+repwage         float   %9.0g                 rep. wage at interview in 1976
+hushrs          int     %9.0g                 hours worked by husband, 1975
+husage          byte    %9.0g                 husband's age
+huseduc         byte    %9.0g                 husband's years of schooling
+huswage         float   %9.0g                 husband's hourly wage, 1975
+faminc          float   %9.0g                 family income, 1975
+mtr             float   %9.0g                 fed. marg. tax rte facing woman
+motheduc        byte    %9.0g                 mother's years of schooling
+fatheduc        byte    %9.0g                 father's years of schooling
+unem            float   %9.0g                 unem. rate in county of resid.
+city            byte    %9.0g                 =1 if live in SMSA
+exper           byte    %9.0g                 actual labor mkt exper
+nwifeinc        float   %9.0g                 (faminc - wage*hours)/1000
+lwage           float   %9.0g                 log(wage)
+expersq         int     %9.0g                 exper^2
+-----------------------------------------------------------------------------------------------------------------------
+Sorted by: 
+
+. 
+. * Select only active/working participants
+. drop if inlf == 0
+(325 observations deleted)
+
+. 
+. ***************************************
+. * Exercise 2 - descriptive statistics *
+. ***************************************
+. 
+. * Dependent Variable: wage
+. sum lwage, d
+
+                          log(wage)
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     .0896578              0
+ 5%     .2876571              0
+10%       .51641              0       Obs                 411
+25%     .8651237              0       Sum of wgt.         411
+
+50%     1.272958                      Mean           1.273238
+                        Largest       Std. dev.      .5960975
+75%      1.62822       3.113515
+90%     2.034993       3.155595       Variance       .3553322
+95%     2.259521       3.218876       Skewness       .3582662
+99%     3.064745       3.218876       Kurtosis       3.392703
+
+. hist lwage, normal
+(bin=20, start=0, width=.16094379)
+
+. 
+. 
+. * Endogenous Variable
+. * educ (years of education)
+. sum educ, d
+
+                     years of schooling
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            7              5
+ 5%            9              6
+10%           10              6       Obs                 411
+25%           12              7       Sum of wgt.         411
+
+50%           12                      Mean            12.6837
+                        Largest       Std. dev.      2.272251
+75%           14             17
+90%           16             17       Variance       5.163124
+95%           17             17       Skewness       .1951874
+99%           17             17       Kurtosis       3.318827
+
+. tab educ // Majority of women have 12 years of education
+
+   years of |
+  schooling |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          5 |          1        0.24        0.24
+          6 |          2        0.49        0.73
+          7 |          2        0.49        1.22
+          8 |         11        2.68        3.89
+          9 |         11        2.68        6.57
+         10 |         20        4.87       11.44
+         11 |         21        5.11       16.55
+         12 |        204       49.64       66.18
+         13 |         26        6.33       72.51
+         14 |         31        7.54       80.05
+         15 |          6        1.46       81.51
+         16 |         38        9.25       90.75
+         17 |         38        9.25      100.00
+------------+-----------------------------------
+      Total |        411      100.00
+
+. 
+. * Exogenous Variable
+. * exper (years of experience in the labor market)
+. sum exper, d
+
+                   actual labor mkt exper
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            2              0
+10%            4              0       Obs                 411
+25%            7              0       Sum of wgt.         411
+
+50%           12                      Mean           13.23844
+                        Largest       Std. dev.      8.054484
+75%           19             36
+90%           24             37       Variance       64.87471
+95%           29             37       Skewness       .7230839
+99%           35             38       Kurtosis       3.129835
+
+. tab exper
+
+     actual |
+  labor mkt |
+      exper |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          5        1.22        1.22
+          1 |          7        1.70        2.92
+          2 |         15        3.65        6.57
+          3 |         10        2.43        9.00
+          4 |         22        5.35       14.36
+          5 |          4        0.97       15.33
+          6 |         25        6.08       21.41
+          7 |         21        5.11       26.52
+          8 |         15        3.65       30.17
+          9 |         29        7.06       37.23
+         10 |         18        4.38       41.61
+         11 |         28        6.81       48.42
+         12 |         14        3.41       51.82
+         13 |         17        4.14       55.96
+         14 |         32        7.79       63.75
+         15 |         18        4.38       68.13
+         16 |         12        2.92       71.05
+         17 |          9        2.19       73.24
+         18 |          7        1.70       74.94
+         19 |         24        5.84       80.78
+         20 |          4        0.97       81.75
+         21 |          8        1.95       83.70
+         22 |          8        1.95       85.64
+         23 |          7        1.70       87.35
+         24 |         12        2.92       90.27
+         25 |          6        1.46       91.73
+         26 |          3        0.73       92.46
+         27 |          4        0.97       93.43
+         28 |          4        0.97       94.40
+         29 |          7        1.70       96.11
+         30 |          1        0.24       96.35
+         31 |          2        0.49       96.84
+         32 |          2        0.49       97.32
+         33 |          3        0.73       98.05
+         34 |          1        0.24       98.30
+         35 |          3        0.73       99.03
+         36 |          1        0.24       99.27
+         37 |          2        0.49       99.76
+         38 |          1        0.24      100.00
+------------+-----------------------------------
+      Total |        411      100.00
+
+. hist exper, discrete
+(start=0, width=1)
+
+. 
+. * Potential Intrumental Variables
+. * motheduc (Years of education of the mother)
+. sum motheduc, d
+
+                 mother's years of schooling
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            3              0
+ 5%            3              0
+10%            7              0       Obs                 411
+25%            7              0       Sum of wgt.         411
+
+50%           10                      Mean           9.481752
+                        Largest       Std. dev.      3.323462
+75%           12             17
+90%           14             17       Variance        11.0454
+95%           16             17       Skewness      -.0229476
+99%           16             17       Kurtosis       2.715434
+
+. tab motheduc
+
+   mother's |
+   years of |
+  schooling |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          4        0.97        0.97
+          3 |         20        4.87        5.84
+          7 |        168       40.88       46.72
+          9 |          3        0.73       47.45
+         10 |         53       12.90       60.34
+         12 |        113       27.49       87.83
+         14 |         28        6.81       94.65
+         16 |         18        4.38       99.03
+         17 |          4        0.97      100.00
+------------+-----------------------------------
+      Total |        411      100.00
+
+. 
+. * fatheduc (Years of education of the father)
+. sum fatheduc, d
+
+                 father's years of schooling
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            3              0
+10%            7              0       Obs                 411
+25%            7              0       Sum of wgt.         411
+
+50%            7                      Mean           8.982968
+                        Largest       Std. dev.      3.537562
+75%           12             17
+90%           14             17       Variance       12.51434
+95%           16             17       Skewness       .2897704
+99%           17             17       Kurtosis       2.869668
+
+. tab fatheduc
+
+   father's |
+   years of |
+  schooling |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          5        1.22        1.22
+          3 |         30        7.30        8.52
+          7 |        193       46.96       55.47
+          9 |          9        2.19       57.66
+         10 |         42       10.22       67.88
+         12 |         84       20.44       88.32
+         14 |         19        4.62       92.94
+         16 |         17        4.14       97.08
+         17 |         12        2.92      100.00
+------------+-----------------------------------
+      Total |        411      100.00
+
+. 
+. * huseduc (Years of education of the husband)
+. sum huseduc, d
+
+                husband's years of schooling
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            5              4
+ 5%            8              4
+10%            8              4       Obs                 411
+25%           11              4       Sum of wgt.         411
+
+50%           12                      Mean           12.59854
+                        Largest       Std. dev.      3.025404
+75%           16             17
+90%           17             17       Variance       9.153071
+95%           17             17       Skewness      -.2755483
+99%           17             17       Kurtosis       2.599849
+
+. tab huseduc
+
+  husband's |
+   years of |
+  schooling |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          4 |          4        0.97        0.97
+          5 |          2        0.49        1.46
+          6 |          4        0.97        2.43
+          7 |          7        1.70        4.14
+          8 |         31        7.54       11.68
+          9 |         14        3.41       15.09
+         10 |         32        7.79       22.87
+         11 |         19        4.62       27.49
+         12 |        129       31.39       58.88
+         13 |         17        4.14       63.02
+         14 |         36        8.76       71.78
+         15 |          9        2.19       73.97
+         16 |         51       12.41       86.37
+         17 |         56       13.63      100.00
+------------+-----------------------------------
+      Total |        411      100.00
+
+. 
+. * check correlations between the endogeneous variable and the potential IVs
+. * it's the very first step to check whether they might be RELEVANT IVs
+. pwcorr educ motheduc fatheduc huseduc, star(0.05)
+
+             |     educ motheduc fatheduc  huseduc
+-------------+------------------------------------
+        educ |   1.0000 
+    motheduc |   0.3971*  1.0000 
+    fatheduc |   0.4120*  0.5527*  1.0000 
+     huseduc |   0.6002*  0.2834*  0.3396*  1.0000 
+
+.         // all of them are highly correlated with educ, as required 
+.         
+. reg educ motheduc fatheduc huseduc exper expersq, r
+
+Linear regression                               Number of obs     =        411
+                                                F(5, 405)         =      62.36
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4350
+                                                Root MSE          =     1.7185
+
+------------------------------------------------------------------------------
+             |               Robust
+        educ | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    motheduc |   .1218513   .0297167     4.10   0.000     .0634331    .1802696
+    fatheduc |   .0957173   .0284656     3.36   0.001     .0397586    .1516761
+     huseduc |   .3781821   .0355523    10.64   0.000      .308292    .4480722
+       exper |   .0375911   .0356054     1.06   0.292    -.0324033    .1075856
+     expersq |  -.0005824   .0010791    -0.54   0.590    -.0027038     .001539
+       _cons |   5.546073   .4752117    11.67   0.000     4.611883    6.480262
+------------------------------------------------------------------------------
+
+. test motheduc fatheduc huseduc
+
+ ( 1)  motheduc = 0
+ ( 2)  fatheduc = 0
+ ( 3)  huseduc = 0
+
+       F(  3,   405) =  102.60
+            Prob > F =    0.0000
+
+.         // the F-test confirms they are jointly significant, so they seem to be
+.         // relevant instruments for education. They are strongly correlated with educ
+.         
+.         
+. *********************************
+. * Exercise 3 - Wage regressions *
+. *********************************
+. 
+. * NOTE: for the sake of comparing the OLS model with the IV model
+. * we will temporarily run the models without robust standard errors
+. * because the Hausman test that needs to be run below cannot be used with robust s.e.
+. * at the very end, we will repeat the models with the "robust" option and
+. * show that the results are virtually the same 
+. * remember that you should use robust s.e. as much as possible
+. 
+. 
+. * a) OLS - neglecting possible endogeneity in educ
+. reg lwage educ exper expersq
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(3, 407)       =     30.53
+       Model |   26.761859         3  8.92061966   Prob > F        =    0.0000
+    Residual |  118.924353       407  .292197428   R-squared       =    0.1837
+-------------+----------------------------------   Adj R-squared   =    0.1777
+       Total |  145.686212       410  .355332225   Root MSE        =    .54055
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .1056312   .0117748     8.97   0.000     .0824841    .1287783
+       exper |       .024   .0110258     2.18   0.030     .0023254    .0456746
+     expersq |  -.0004584   .0003257    -1.41   0.160    -.0010986    .0001819
+       _cons |  -.2742848    .166226    -1.65   0.100    -.6010535     .052484
+------------------------------------------------------------------------------
+
+. estimates store ols                     // store these estimates to run Hausman test later
+
+. 
+.         // from this output, we would conclude that each additional year of 
+.         // education (experience) is associated with a 10.6% (2.4%) increase in 
+.         // wages for American working women. However, educ is likely correlated with
+.         // unobserved factors that are included in the error term that also affect
+.         // wages - e.g. ability, quality of education institutions, ambition, network
+.         
+. * b) Manual IV estimation using one instrument - fatheduc
+. 
+. * reduced form eqt: regressing educ on all exogeneous vars and one instrument   
+. reg educ fatheduc exper expersq
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(3, 407)       =     28.29
+       Model |  365.229695         3  121.743232   Prob > F        =    0.0000
+    Residual |  1751.65108       407  4.30381102   R-squared       =    0.1725
+-------------+----------------------------------   Adj R-squared   =    0.1664
+       Total |  2116.88078       410  5.16312385   Root MSE        =    2.0746
+
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .2658895   .0292414     9.09   0.000     .2084066    .3233725
+       exper |   .0438721   .0422601     1.04   0.300    -.0392032    .1269473
+     expersq |  -.0010302   .0012503    -0.82   0.410     -.003488    .0014277
+       _cons |   9.961632   .4059543    24.54   0.000     9.163603    10.75966
+------------------------------------------------------------------------------
+
+. 
+. test fatheduc   // this indicates that fatheduc is a relevant instrument 
+
+ ( 1)  fatheduc = 0
+
+       F(  1,   407) =   82.68
+            Prob > F =    0.0000
+
+. 
+. * obtain the predicted values for educ
+. predict educ_hat, xb
+
+. 
+. * plug-in this new variable in the structural eqt for wage: 
+. reg lwage educ_hat exper expersq
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(3, 407)       =      5.28
+       Model |  5.46247965         3  1.82082655   Prob > F        =    0.0014
+    Residual |  140.223732       407  .344530055   R-squared       =    0.0375
+-------------+----------------------------------   Adj R-squared   =    0.0304
+       Total |  145.686212       410  .355332225   Root MSE        =    .58697
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    educ_hat |   .0789133    .031116     2.54   0.012     .0177452    .1400814
+       exper |   .0254729   .0120742     2.11   0.035     .0017373    .0492085
+     expersq |  -.0005068   .0003574    -1.42   0.157    -.0012093    .0001958
+       _cons |   .0567151   .3950808     0.14   0.886    -.7199387    .8333689
+------------------------------------------------------------------------------
+
+. 
+. * automatically, using ivreg2
+. ivreg2 lwage (educ = fatheduc) exper expersq, first 
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .2658895   .0292414     9.09   0.000     .2084066    .3233725
+       exper |   .0438721   .0422601     1.04   0.300    -.0392032    .1269473
+     expersq |  -.0010302   .0012503    -0.82   0.410     -.003488    .0014277
+       _cons |   9.961632   .4059543    24.54   0.000     9.163603    10.75966
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  1,   407)  P-val | SW Chi-sq(  1) P-val | SW F(  1,   407)
+educ         |      82.68    0.0000 |       83.49   0.0000 |       82.68
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(1)=69.40    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      82.68
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=1:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(1,407)=       6.43     P-val=0.0116
+Anderson-Rubin Wald test           Chi-sq(1)=      6.50     P-val=0.0108
+Stock-Wright LM S statistic        Chi-sq(1)=      6.39     P-val=0.0115
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          4
+Number of excluded instruments       L1 =          1
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.15
+                                                      Prob > F      =   0.0004
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1734
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8517
+Residual SS             =   120.428782                Root MSE      =    .5413
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0789133   .0286955     2.75   0.006     .0226711    .1351555
+       exper |   .0254729    .011135     2.29   0.022     .0036488     .047297
+     expersq |  -.0005068   .0003296    -1.54   0.124    -.0011528    .0001392
+       _cons |   .0567151   .3643482     0.16   0.876    -.6573943    .7708245
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          69.396
+                                                   Chi-sq(1) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               82.681
+Stock-Yogo weak ID test critical values: 10% maximal IV size             16.38
+                                         15% maximal IV size              8.96
+                                         20% maximal IV size              6.66
+                                         25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.000
+                                                 (equation exactly identified)
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc
+------------------------------------------------------------------------------
+
+. estimates store iv_1inst                // store IV estimates using 1 instrument
+
+. 
+.                 // we see that the coefficient of educ is now smaller, but still significant
+.                 // the results indicate an increase in wages of 7.9% for each additional
+.                 // year of education
+.                 
+.                 // the difference in the coefficients could indicate that endogeneity can
+.                 // actually be present, and that part of the effect we obtain in OLS
+.                 // is attributed to unobserved factors (e.g., ability) rather than 
+.                 // education per se.
+. 
+.                 
+. * c) compare the estimates of OLS and IV-1 instrument
+. hausman iv_1inst ols
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |    iv_1inst       ols         Difference       Std. err.
+-------------+----------------------------------------------------------------
+        educ |    .0789133     .1056312       -.0267179        .0261684
+       exper |    .0254729         .024        .0014729        .0015555
+     expersq |   -.0005068    -.0004584       -.0000484        .0000504
+------------------------------------------------------------------------------
+                         b = Consistent under H0 and Ha; obtained from ivreg2.
+         B = Inconsistent under Ha, efficient under H0; obtained from regress.
+
+Test of H0: Difference in coefficients not systematic
+
+    chi2(3) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+            =   1.04
+Prob > chi2 = 0.7910
+
+. 
+.         // surprisingly, we do not reject H0, which states that the coefficients are
+.         // not significantly different. We could still suspect that endogeneity
+.         // is an issue due to the difference in "educ" coefficient. 
+.         // we can test this more explicitly using the following steps - question d)
+. 
+. 
+.         
+. * d) testing for the presence of endogeneity manually - slide 20
+.         
+. reg educ fatheduc exper expersq 
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(3, 407)       =     28.29
+       Model |  365.229695         3  121.743232   Prob > F        =    0.0000
+    Residual |  1751.65108       407  4.30381102   R-squared       =    0.1725
+-------------+----------------------------------   Adj R-squared   =    0.1664
+       Total |  2116.88078       410  5.16312385   Root MSE        =    2.0746
+
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .2658895   .0292414     9.09   0.000     .2084066    .3233725
+       exper |   .0438721   .0422601     1.04   0.300    -.0392032    .1269473
+     expersq |  -.0010302   .0012503    -0.82   0.410     -.003488    .0014277
+       _cons |   9.961632   .4059543    24.54   0.000     9.163603    10.75966
+------------------------------------------------------------------------------
+
+. 
+. * predict the residuals of this equation and add them as a regressor in the wage eqt
+. 
+. predict educ_res, res
+
+. reg lwage educ exper expersq educ_res
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(4, 406)       =     23.16
+       Model |  27.0674806         4  6.76687016   Prob > F        =    0.0000
+    Residual |  118.618731       406  .292164363   R-squared       =    0.1858
+-------------+----------------------------------   Adj R-squared   =    0.1778
+       Total |  145.686212       410  .355332225   Root MSE        =    .54052
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0789133   .0286539     2.75   0.006     .0225848    .1352418
+       exper |   .0254729   .0111188     2.29   0.022     .0036153    .0473305
+     expersq |  -.0005068   .0003291    -1.54   0.124    -.0011537    .0001402
+    educ_res |   .0321456   .0314299     1.02   0.307    -.0296401    .0939313
+       _cons |   .0567151   .3638195     0.16   0.876    -.6584901    .7719204
+------------------------------------------------------------------------------
+
+. 
+.         // the residuals' coefficient is not statistically significant
+.         // so apparently endogeneity is not really a problem in this case, despite
+.         // the smaller coefficient for education
+.                 
+.         
+. * e) testing whether endogeneity is indeed present using ivendog post-estimation
+. 
+. ivreg2 lwage (educ = fatheduc) exper expersq, first
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .2658895   .0292414     9.09   0.000     .2084066    .3233725
+       exper |   .0438721   .0422601     1.04   0.300    -.0392032    .1269473
+     expersq |  -.0010302   .0012503    -0.82   0.410     -.003488    .0014277
+       _cons |   9.961632   .4059543    24.54   0.000     9.163603    10.75966
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  1,   407)  P-val | SW Chi-sq(  1) P-val | SW F(  1,   407)
+educ         |      82.68    0.0000 |       83.49   0.0000 |       82.68
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(1)=69.40    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      82.68
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=1:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(1,407)=       6.43     P-val=0.0116
+Anderson-Rubin Wald test           Chi-sq(1)=      6.50     P-val=0.0108
+Stock-Wright LM S statistic        Chi-sq(1)=      6.39     P-val=0.0115
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          4
+Number of excluded instruments       L1 =          1
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.15
+                                                      Prob > F      =   0.0004
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1734
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8517
+Residual SS             =   120.428782                Root MSE      =    .5413
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0789133   .0286955     2.75   0.006     .0226711    .1351555
+       exper |   .0254729    .011135     2.29   0.022     .0036488     .047297
+     expersq |  -.0005068   .0003296    -1.54   0.124    -.0011528    .0001392
+       _cons |   .0567151   .3643482     0.16   0.876    -.6573943    .7708245
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          69.396
+                                                   Chi-sq(1) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               82.681
+Stock-Yogo weak ID test critical values: 10% maximal IV size             16.38
+                                         15% maximal IV size              8.96
+                                         20% maximal IV size              6.66
+                                         25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.000
+                                                 (equation exactly identified)
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc
+------------------------------------------------------------------------------
+
+. ivendog educ             // remember to install it first (ssc install ivendog)
+
+Tests of endogeneity of: educ
+H0: Regressor is exogenous
+    Wu-Hausman F test:                  1.04606  F(1,406)    P-value = 0.30703
+    Durbin-Wu-Hausman chi-sq test:      1.05622  Chi-sq(1)   P-value = 0.30408
+
+. 
+.         // none of the tests reject the hypothesis that educ is exogeneous!
+.         // apparently, there is no serious endogeneity in educ in this dataset
+.         
+. * in alternative, we could do: 
+. ivreg2 lwage (educ = fatheduc) exper expersq, first endog(educ)
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .2658895   .0292414     9.09   0.000     .2084066    .3233725
+       exper |   .0438721   .0422601     1.04   0.300    -.0392032    .1269473
+     expersq |  -.0010302   .0012503    -0.82   0.410     -.003488    .0014277
+       _cons |   9.961632   .4059543    24.54   0.000     9.163603    10.75966
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  1,   407) =    82.68
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  1,   407)  P-val | SW Chi-sq(  1) P-val | SW F(  1,   407)
+educ         |      82.68    0.0000 |       83.49   0.0000 |       82.68
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(1)=69.40    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      82.68
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=1:
+                                   10% maximal IV size             16.38
+                                   15% maximal IV size              8.96
+                                   20% maximal IV size              6.66
+                                   25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(1,407)=       6.43     P-val=0.0116
+Anderson-Rubin Wald test           Chi-sq(1)=      6.50     P-val=0.0108
+Stock-Wright LM S statistic        Chi-sq(1)=      6.39     P-val=0.0115
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          4
+Number of excluded instruments       L1 =          1
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.15
+                                                      Prob > F      =   0.0004
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1734
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8517
+Residual SS             =   120.428782                Root MSE      =    .5413
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0789133   .0286955     2.75   0.006     .0226711    .1351555
+       exper |   .0254729    .011135     2.29   0.022     .0036488     .047297
+     expersq |  -.0005068   .0003296    -1.54   0.124    -.0011528    .0001392
+       _cons |   .0567151   .3643482     0.16   0.876    -.6573943    .7708245
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          69.396
+                                                   Chi-sq(1) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               82.681
+Stock-Yogo weak ID test critical values: 10% maximal IV size             16.38
+                                         15% maximal IV size              8.96
+                                         20% maximal IV size              6.66
+                                         25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.000
+                                                 (equation exactly identified)
+-endog- option:
+Endogeneity test of endogenous regressors:                               1.056
+                                                   Chi-sq(1) P-val =    0.3041
+Regressors tested:    educ
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc
+------------------------------------------------------------------------------
+
+.         
+.                 // we get a test at the bottom of the output, and still we do not reject
+.                 // the null hypothesis that educ is exogeneous
+. 
+.                 
+. * f) Using both mother's and father's educ as instruments
+. 
+. reg educ fatheduc motheduc exper expersq
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(4, 406)       =     27.72
+       Model |  454.055047         4  113.513762   Prob > F        =    0.0000
+    Residual |  1662.82573       406  4.09562988   R-squared       =    0.2145
+-------------+----------------------------------   Adj R-squared   =    0.2068
+       Total |  2116.88078       410  5.16312385   Root MSE        =    2.0238
+
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .1795146    .034025     5.28   0.000     .1126274    .2464017
+    motheduc |   .1683304   .0361455     4.66   0.000     .0972747    .2393862
+       exper |   .0431049   .0412256     1.05   0.296    -.0379374    .1241473
+     expersq |  -.0009103   .0012199    -0.75   0.456    -.0033085    .0014879
+       _cons |   9.122872   .4350468    20.97   0.000     8.267646    9.978097
+------------------------------------------------------------------------------
+
+. predict educ2_hat, xb
+
+. reg lwage educ2_hat exper expersq
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(3, 407)       =      5.70
+       Model |  5.87003334         3  1.95667778   Prob > F        =    0.0008
+    Residual |  139.816179       407  .343528695   R-squared       =    0.0403
+-------------+----------------------------------   Adj R-squared   =    0.0332
+       Total |  145.686212       410  .355332225   Root MSE        =    .58611
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   educ2_hat |   .0768108   .0277947     2.76   0.006     .0221716      .13145
+       exper |   .0255888   .0120323     2.13   0.034     .0019356     .049242
+     expersq |  -.0005106    .000356    -1.43   0.152    -.0012104    .0001892
+       _cons |   .0827623   .3550181     0.23   0.816    -.6151357    .7806603
+------------------------------------------------------------------------------
+
+. 
+. * or do it automatically:
+. ivreg2 lwage (educ = fatheduc motheduc) exper expersq, first
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .1795146    .034025     5.28   0.000     .1126274    .2464017
+    motheduc |   .1683304   .0361455     4.66   0.000     .0972747    .2393862
+       exper |   .0431049   .0412256     1.05   0.296    -.0379374    .1241473
+     expersq |  -.0009103   .0012199    -0.75   0.456    -.0033085    .0014879
+       _cons |   9.122872   .4350468    20.97   0.000     8.267646    9.978097
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  2,   406)  P-val | SW Chi-sq(  2) P-val | SW F(  2,   406)
+educ         |      54.29    0.0000 |      109.91   0.0000 |       54.29
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(2)=86.72    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      54.29
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=2:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(2,406)=       3.82     P-val=0.0227
+Anderson-Rubin Wald test           Chi-sq(2)=      7.74     P-val=0.0209
+Stock-Wright LM S statistic        Chi-sq(2)=      7.59     P-val=0.0225
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          5
+Number of excluded instruments       L1 =          2
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.60
+                                                      Prob > F      =   0.0002
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1717
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8514
+Residual SS             =  120.6748724                Root MSE      =    .5419
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0768108   .0256962     2.99   0.003     .0264472    .1271744
+       exper |   .0255888   .0111238     2.30   0.021     .0037865    .0473911
+     expersq |  -.0005106   .0003291    -1.55   0.121    -.0011556    .0001345
+       _cons |   .0827623   .3282135     0.25   0.801    -.5605244     .726049
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          86.719
+                                                   Chi-sq(2) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               54.286
+Stock-Yogo weak ID test critical values: 10% maximal IV size             19.93
+                                         15% maximal IV size             11.59
+                                         20% maximal IV size              8.75
+                                         25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.027
+                                                   Chi-sq(1) P-val =    0.8699
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc
+------------------------------------------------------------------------------
+
+. 
+.         * the return to education is very similar to the one obtained with only 1
+.         * instrument - now 7.7% instead of 7.9% for each extra year of education
+.         
+. * Test for Overidentification 
+. * first, manually 
+. 
+. /* In order to test for overidentying restrictions (check slide 22):
+> 
+> 1. We need to perform the 2SLS regression with the instruments and then obtain 
+> the residuals.
+> 
+> 2. We regress those residuals on all the EXOGENOUS variables including the 
+> instruments (educ should not be included). We obtain the R squared.
+> 
+> 3. Finally, we calculate the statistic for the test, which is N (the number of 
+> observations) multiplied by the R-squared. 
+> 
+> The test is accomplished by comparing that statistic to a Chi-Square distribution
+> with "q" degrees of freedom (where "q" is the # of restrictions, i.e., the 
+> number of instruments we have minus the number of endogenous variables we have). 
+> In this case, q = 2 - 1 = 1. --- check slide 22 */
+. 
+. * Predicting the residuals from the 2SLS IV regression
+. ivreg2 lwage (educ = fatheduc motheduc) exper expersq, first
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .1795146    .034025     5.28   0.000     .1126274    .2464017
+    motheduc |   .1683304   .0361455     4.66   0.000     .0972747    .2393862
+       exper |   .0431049   .0412256     1.05   0.296    -.0379374    .1241473
+     expersq |  -.0009103   .0012199    -0.75   0.456    -.0033085    .0014879
+       _cons |   9.122872   .4350468    20.97   0.000     8.267646    9.978097
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  2,   406)  P-val | SW Chi-sq(  2) P-val | SW F(  2,   406)
+educ         |      54.29    0.0000 |      109.91   0.0000 |       54.29
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(2)=86.72    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      54.29
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=2:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(2,406)=       3.82     P-val=0.0227
+Anderson-Rubin Wald test           Chi-sq(2)=      7.74     P-val=0.0209
+Stock-Wright LM S statistic        Chi-sq(2)=      7.59     P-val=0.0225
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          5
+Number of excluded instruments       L1 =          2
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.60
+                                                      Prob > F      =   0.0002
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1717
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8514
+Residual SS             =  120.6748724                Root MSE      =    .5419
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0768108   .0256962     2.99   0.003     .0264472    .1271744
+       exper |   .0255888   .0111238     2.30   0.021     .0037865    .0473911
+     expersq |  -.0005106   .0003291    -1.55   0.121    -.0011556    .0001345
+       _cons |   .0827623   .3282135     0.25   0.801    -.5605244     .726049
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          86.719
+                                                   Chi-sq(2) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               54.286
+Stock-Yogo weak ID test critical values: 10% maximal IV size             19.93
+                                         15% maximal IV size             11.59
+                                         20% maximal IV size              8.75
+                                         25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.027
+                                                   Chi-sq(1) P-val =    0.8699
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc
+------------------------------------------------------------------------------
+
+. predict uhat, res
+
+. 
+. * Regressing the residuals on all the exogenous variables, including the instruments
+. reg uhat exper expersq motheduc fatheduc
+
+      Source |       SS           df       MS      Number of obs   =       411
+-------------+----------------------------------   F(4, 406)       =      0.01
+       Model |  .007874638         4  .001968659   Prob > F        =    0.9999
+    Residual |  120.666998       406  .297209354   R-squared       =    0.0001
+-------------+----------------------------------   Adj R-squared   =   -0.0098
+       Total |  120.674872       410  .294328957   Root MSE        =    .54517
+
+------------------------------------------------------------------------------
+        uhat | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       exper |  -.0000172   .0111055    -0.00   0.999    -.0218487    .0218143
+     expersq |   6.34e-07   .0003286     0.00   0.998    -.0006454    .0006467
+    motheduc |  -.0014178    .009737    -0.15   0.884    -.0205591    .0177234
+    fatheduc |   .0012866   .0091658     0.14   0.888    -.0167317    .0193048
+       _cons |   .0019619   .1171944     0.02   0.987    -.2284217    .2323454
+------------------------------------------------------------------------------
+
+. 
+. * Obtaining the statistic for the test
+. scalar overidtest = e(r2)*e(N)
+
+. di overidtest
+.0268198
+
+. 
+. 
+. /* For a 5% level of significance, the value of a Chi-square with 1 degree of 
+> freedom is 3.841. Our statistic is way smaller than that (0.0268). Therefore,
+> it does not fall in the rejection area, so we cannot reject the null hypothesis 
+> in this case. Therefore, the conclusion is that instruments are valid 
+> (they are NOT correlated with the error term). If we rejected the hypothesis, 
+> it would mean that *at least one* would not be valid.
+> */
+. 
+. * you can also do it automatically, as follows: 
+. ivreg2 lwage (educ = fatheduc motheduc) exper expersq, first
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .1795146    .034025     5.28   0.000     .1126274    .2464017
+    motheduc |   .1683304   .0361455     4.66   0.000     .0972747    .2393862
+       exper |   .0431049   .0412256     1.05   0.296    -.0379374    .1241473
+     expersq |  -.0009103   .0012199    -0.75   0.456    -.0033085    .0014879
+       _cons |   9.122872   .4350468    20.97   0.000     8.267646    9.978097
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  2,   406) =    54.29
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  2,   406)  P-val | SW Chi-sq(  2) P-val | SW F(  2,   406)
+educ         |      54.29    0.0000 |      109.91   0.0000 |       54.29
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(2)=86.72    P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                      54.29
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=2:
+                                   10% maximal IV size             19.93
+                                   15% maximal IV size             11.59
+                                   20% maximal IV size              8.75
+                                   25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(2,406)=       3.82     P-val=0.0227
+Anderson-Rubin Wald test           Chi-sq(2)=      7.74     P-val=0.0209
+Stock-Wright LM S statistic        Chi-sq(2)=      7.59     P-val=0.0225
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          5
+Number of excluded instruments       L1 =          2
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     6.60
+                                                      Prob > F      =   0.0002
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1717
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8514
+Residual SS             =  120.6748724                Root MSE      =    .5419
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0768108   .0256962     2.99   0.003     .0264472    .1271744
+       exper |   .0255888   .0111238     2.30   0.021     .0037865    .0473911
+     expersq |  -.0005106   .0003291    -1.55   0.121    -.0011556    .0001345
+       _cons |   .0827623   .3282135     0.25   0.801    -.5605244     .726049
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):          86.719
+                                                   Chi-sq(2) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               54.286
+Stock-Yogo weak ID test critical values: 10% maximal IV size             19.93
+                                         15% maximal IV size             11.59
+                                         20% maximal IV size              8.75
+                                         25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.027
+                                                   Chi-sq(1) P-val =    0.8699
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc
+------------------------------------------------------------------------------
+
+. overid          // you need to install it first, type ssc install overid
+
+Overidentification test: 2SLS-based (LM version)
+  Test consistent for homoskedasticity only
+j=    0.03  Chi-sq(  1) p-value=0.8699
+
+. 
+.         // we conclude once more that the instruments are valid, and we get the 
+.         // same test statistic as we obtained before (0.027)
+. 
+. 
+. 
+. * g) using 3 instruments
+. 
+. ivreg2 lwage (educ = fatheduc motheduc huseduc) exper expersq, first
+
+First-stage regressions
+-----------------------
+
+
+First-stage regression of educ:
+
+Statistics consistent for homoskedasticity only
+Number of obs =                    411
+------------------------------------------------------------------------------
+        educ | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    fatheduc |   .0957173   .0296513     3.23   0.001     .0374278    .1540069
+    motheduc |   .1218513   .0309149     3.94   0.000     .0610776    .1826251
+     huseduc |   .3781821   .0300809    12.57   0.000      .319048    .4373163
+       exper |   .0375911   .0350096     1.07   0.284    -.0312321    .1064144
+     expersq |  -.0005824   .0010363    -0.56   0.574    -.0026195    .0014547
+       _cons |   5.546073   .4662757    11.89   0.000      4.62945    6.462695
+------------------------------------------------------------------------------
+F test of excluded instruments:
+  F(  3,   405) =   102.88
+  Prob > F      =   0.0000
+Sanderson-Windmeijer multivariate F test of excluded instruments:
+  F(  3,   405) =   102.88
+  Prob > F      =   0.0000
+
+
+
+Summary results for first-stage regressions
+-------------------------------------------
+
+                                           (Underid)            (Weak id)
+Variable     | F(  3,   405)  P-val | SW Chi-sq(  3) P-val | SW F(  3,   405)
+educ         |     102.88    0.0000 |      313.20   0.0000 |      102.88
+
+Stock-Yogo weak ID F test critical values for single endogenous regressor:
+                                    5% maximal IV relative bias    13.91
+                                   10% maximal IV relative bias     9.08
+                                   20% maximal IV relative bias     6.46
+                                   30% maximal IV relative bias     5.39
+                                   10% maximal IV size             22.30
+                                   15% maximal IV size             12.83
+                                   20% maximal IV size              9.54
+                                   25% maximal IV size              7.80
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Sanderson-Windmeijer F statistic.
+
+Underidentification test
+Ho: matrix of reduced form coefficients has rank=K1-1 (underidentified)
+Ha: matrix has rank=K1 (identified)
+Anderson canon. corr. LM statistic       Chi-sq(3)=177.75   P-val=0.0000
+
+Weak identification test
+Ho: equation is weakly identified
+Cragg-Donald Wald F statistic                                     102.88
+
+Stock-Yogo weak ID test critical values for K1=1 and L1=3:
+                                    5% maximal IV relative bias    13.91
+                                   10% maximal IV relative bias     9.08
+                                   20% maximal IV relative bias     6.46
+                                   30% maximal IV relative bias     5.39
+                                   10% maximal IV size             22.30
+                                   15% maximal IV size             12.83
+                                   20% maximal IV size              9.54
+                                   25% maximal IV size              7.80
+Source: Stock-Yogo (2005).  Reproduced by permission.
+
+Weak-instrument-robust inference
+Tests of joint significance of endogenous regressors B1 in main equation
+Ho: B1=0 and orthogonality conditions are valid
+Anderson-Rubin Wald test           F(3,405)=       7.05     P-val=0.0001
+Anderson-Rubin Wald test           Chi-sq(3)=     21.47     P-val=0.0001
+Stock-Wright LM S statistic        Chi-sq(3)=     20.40     P-val=0.0001
+
+Number of observations               N  =        411
+Number of regressors                 K  =          4
+Number of endogenous regressors      K1 =          1
+Number of instruments                L  =          6
+Number of excluded instruments       L1 =          3
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics consistent for homoskedasticity only
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =    11.58
+                                                      Prob > F      =   0.0000
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1789
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8527
+Residual SS             =  119.6230467                Root MSE      =    .5395
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0874233   .0178698     4.89   0.000     .0523991    .1224475
+       exper |   .0250038   .0110292     2.27   0.023      .003387    .0466205
+     expersq |  -.0004914    .000326    -1.51   0.132    -.0011303    .0001476
+       _cons |  -.0487127   .2352391    -0.21   0.836    -.5097729    .4123475
+------------------------------------------------------------------------------
+Underidentification test (Anderson canon. corr. LM statistic):         177.749
+                                                   Chi-sq(3) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):              102.877
+Stock-Yogo weak ID test critical values:  5% maximal IV relative bias    13.91
+                                         10% maximal IV relative bias     9.08
+                                         20% maximal IV relative bias     6.46
+                                         30% maximal IV relative bias     5.39
+                                         10% maximal IV size             22.30
+                                         15% maximal IV size             12.83
+                                         20% maximal IV size              9.54
+                                         25% maximal IV size              7.80
+Source: Stock-Yogo (2005).  Reproduced by permission.
+------------------------------------------------------------------------------
+Sargan statistic (overidentification test of all instruments):           0.363
+                                                   Chi-sq(2) P-val =    0.8340
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc huseduc
+------------------------------------------------------------------------------
+
+. overid  
+
+Overidentification test: 2SLS-based (LM version)
+  Test consistent for homoskedasticity only
+j=    0.36  Chi-sq(  2) p-value=0.8340
+
+. 
+.                 // the return to education is estimated to be 8.7% per each extra
+.                 // year of education
+.                 // overid test still indicates that our instruments are exogeneous
+.                 // if we would reject H0 here, at least one would not be exogeneous
+.                 // note that the estimate is now closer to the one we get in OLS
+.                 
+. 
+. * h) wrap up and get the different estimates once more (and using robust s.e.)
+. 
+. * OLS 
+. reg lwage educ exper expersq, r                         //beta: 0.1056; se: 0.0110
+
+Linear regression                               Number of obs     =        411
+                                                F(3, 407)         =      33.00
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1837
+                                                Root MSE          =     .54055
+
+------------------------------------------------------------------------------
+             |               Robust
+       lwage | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .1056312   .0110265     9.58   0.000     .0839553    .1273071
+       exper |       .024   .0120547     1.99   0.047     .0003027    .0476973
+     expersq |  -.0004584   .0003462    -1.32   0.186    -.0011389    .0002222
+       _cons |  -.2742848   .1650761    -1.66   0.097     -.598793    .0502234
+------------------------------------------------------------------------------
+
+. 
+. * 1 instrument only - fatheduc (question 3b)
+. ivreg2 lwage (educ = fatheduc) exper expersq, r //beta: 0.0789; se: 0.0311
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics robust to heteroskedasticity
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     4.81
+                                                      Prob > F      =   0.0027
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1734
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8517
+Residual SS             =   120.428782                Root MSE      =    .5413
+
+------------------------------------------------------------------------------
+             |               Robust
+       lwage | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0789133   .0311282     2.54   0.011     .0179031    .1399235
+       exper |   .0254729   .0121244     2.10   0.036     .0017095    .0492363
+     expersq |  -.0005068   .0003507    -1.45   0.148    -.0011941    .0001806
+       _cons |   .0567151   .4005977     0.14   0.887     -.728442    .8418722
+------------------------------------------------------------------------------
+Underidentification test (Kleibergen-Paap rk LM statistic):             51.853
+                                                   Chi-sq(1) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               82.681
+                         (Kleibergen-Paap rk Wald F statistic):         81.302
+Stock-Yogo weak ID test critical values: 10% maximal IV size             16.38
+                                         15% maximal IV size              8.96
+                                         20% maximal IV size              6.66
+                                         25% maximal IV size              5.53
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Cragg-Donald F statistic and i.i.d. errors.
+------------------------------------------------------------------------------
+Hansen J statistic (overidentification test of all instruments):         0.000
+                                                 (equation exactly identified)
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc
+------------------------------------------------------------------------------
+
+. 
+. * 2 instruments - question 3f
+. ivreg2 lwage (educ = fatheduc motheduc) exper expersq, r        //b: 0.0768; se: 0.0280
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics robust to heteroskedasticity
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     5.01
+                                                      Prob > F      =   0.0020
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1717
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8514
+Residual SS             =  120.6748724                Root MSE      =    .5419
+
+------------------------------------------------------------------------------
+             |               Robust
+       lwage | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0768108   .0280322     2.74   0.006     .0218687    .1317529
+       exper |   .0255888   .0120567     2.12   0.034      .001958    .0492196
+     expersq |  -.0005106   .0003483    -1.47   0.143    -.0011931     .000172
+       _cons |   .0827623   .3671059     0.23   0.822     -.636752    .8022766
+------------------------------------------------------------------------------
+Underidentification test (Kleibergen-Paap rk LM statistic):             62.087
+                                                   Chi-sq(2) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):               54.286
+                         (Kleibergen-Paap rk Wald F statistic):         47.570
+Stock-Yogo weak ID test critical values: 10% maximal IV size             19.93
+                                         15% maximal IV size             11.59
+                                         20% maximal IV size              8.75
+                                         25% maximal IV size              7.25
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Cragg-Donald F statistic and i.i.d. errors.
+------------------------------------------------------------------------------
+Hansen J statistic (overidentification test of all instruments):         0.027
+                                                   Chi-sq(1) P-val =    0.8683
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc
+------------------------------------------------------------------------------
+
+. 
+. * 3 instruments - question 3g
+. ivreg2 lwage (educ = fatheduc motheduc huseduc) exper expersq, r //b:0.0874; se: 0.0187
+
+IV (2SLS) estimation
+--------------------
+
+Estimates efficient for homoskedasticity only
+Statistics robust to heteroskedasticity
+
+                                                      Number of obs =      411
+                                                      F(  3,   407) =     9.54
+                                                      Prob > F      =   0.0000
+Total (centered) SS     =  145.6862121                Centered R2   =   0.1789
+Total (uncentered) SS   =  811.9721782                Uncentered R2 =   0.8527
+Residual SS             =  119.6230467                Root MSE      =    .5395
+
+------------------------------------------------------------------------------
+             |               Robust
+       lwage | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        educ |   .0874233   .0187019     4.67   0.000     .0507683    .1240783
+       exper |   .0250038   .0120046     2.08   0.037     .0014751    .0485324
+     expersq |  -.0004914   .0003456    -1.42   0.155    -.0011687     .000186
+       _cons |  -.0487127   .2552112    -0.19   0.849    -.5489175    .4514921
+------------------------------------------------------------------------------
+Underidentification test (Kleibergen-Paap rk LM statistic):            102.507
+                                                   Chi-sq(3) P-val =    0.0000
+------------------------------------------------------------------------------
+Weak identification test (Cragg-Donald Wald F statistic):              102.877
+                         (Kleibergen-Paap rk Wald F statistic):        102.597
+Stock-Yogo weak ID test critical values:  5% maximal IV relative bias    13.91
+                                         10% maximal IV relative bias     9.08
+                                         20% maximal IV relative bias     6.46
+                                         30% maximal IV relative bias     5.39
+                                         10% maximal IV size             22.30
+                                         15% maximal IV size             12.83
+                                         20% maximal IV size              9.54
+                                         25% maximal IV size              7.80
+Source: Stock-Yogo (2005).  Reproduced by permission.
+NB: Critical values are for Cragg-Donald F statistic and i.i.d. errors.
+------------------------------------------------------------------------------
+Hansen J statistic (overidentification test of all instruments):         0.360
+                                                   Chi-sq(2) P-val =    0.8353
+------------------------------------------------------------------------------
+Instrumented:         educ
+Included instruments: exper expersq
+Excluded instruments: fatheduc motheduc huseduc
+------------------------------------------------------------------------------
+
+. 
+. // using 3 instruments would give a more efficient estimate of the returns to 
+. // education - the lowest standard error, so that would be preferred IF EDUC
+. // WAS INDEED ENDOGENOUS! BUT THE TESTS ABOVE ALL INDICATE THAT ENDOGENEITY IS
+. // NOT AN ISSUE IN THIS DATA --- SO OLS IS RECOMMENDED - MORE EFFICIENT THAN IV!
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 6\worksho
+> p_IV.log
+  log type:  text
+ closed on:  25 Nov 2022, 15:26:32
+-----------------------------------------------------------------------------------------------------------------------

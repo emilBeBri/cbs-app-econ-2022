@@ -1,0 +1,16 @@
+
+
+# Session info {.unnumbered}
+
+hej
+
+```{r echo=FALSE, message=FALSE}
+
+source('r/pre-processing.r')
+
+sessionInfo()
+
+# knitr::include_graphics("qmd/img/test.png")
+
+
+```

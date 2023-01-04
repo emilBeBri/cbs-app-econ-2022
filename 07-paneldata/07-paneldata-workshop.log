@@ -1,0 +1,680 @@
+-----------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 7\worksho
+> p_paneldata.log
+  log type:  text
+ opened on:   2 Dec 2022, 17:45:15
+
+. 
+. * open the dataset (available on CANVAS)
+. use wagecps.dta
+(PSID wage data 1976-82 from Baltagi and Khanti-Akom (1990))
+
+. 
+. ************************************
+. * Exercise 1 - describing the data *
+. ************************************
+. 
+. describe
+
+Contains data from wagecps.dta
+ Observations:         4,165                  PSID wage data 1976-82 from Baltagi and Khanti-Akom (1990)
+    Variables:            22                  3 Dec 2015 16:49
+                                              (_dta has notes)
+-----------------------------------------------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-----------------------------------------------------------------------------------------------------------------------
+exp             float   %9.0g                 years of full-time work experience
+wks             float   %9.0g                 weeks worked
+occ             float   %9.0g                 occupation; occ==1 if in a blue-collar occupation
+ind             float   %9.0g                 industry; ind==1 if working in a manufacturing industry
+south           float   %9.0g                 residence; south==1 if in the South area
+smsa            float   %9.0g                 smsa==1 if in the Standard metropolitan statistical area
+ms              float   %9.0g                 marital status
+fem             float   %9.0g                 female or male
+union           float   %9.0g                 if wage set be a union contract
+ed              float   %9.0g                 years of education
+blk             float   %9.0g                 black
+lwage           float   %9.0g                 log wage
+id              float   %9.0g                 
+t               float   %9.0g                 
+tdum1           byte    %8.0g                 t== 1.0000
+tdum2           byte    %8.0g                 t== 2.0000
+tdum3           byte    %8.0g                 t== 3.0000
+tdum4           byte    %8.0g                 t== 4.0000
+tdum5           byte    %8.0g                 t== 5.0000
+tdum6           byte    %8.0g                 t== 6.0000
+tdum7           byte    %8.0g                 t== 7.0000
+exp2            float   %9.0g                 
+-----------------------------------------------------------------------------------------------------------------------
+Sorted by: id  t
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+         exp |      4,165    19.85378    10.96637          1         51
+         wks |      4,165    46.81152    5.129098          5         52
+         occ |      4,165    .5111645    .4999354          0          1
+         ind |      4,165    .3954382    .4890033          0          1
+       south |      4,165    .2902761    .4539442          0          1
+-------------+---------------------------------------------------------
+        smsa |      4,165    .6537815     .475821          0          1
+          ms |      4,165    .8144058    .3888256          0          1
+         fem |      4,165     .112605    .3161473          0          1
+       union |      4,165    .3639856    .4812023          0          1
+          ed |      4,165    12.84538    2.787995          4         17
+-------------+---------------------------------------------------------
+         blk |      4,165    .0722689    .2589637          0          1
+       lwage |      4,165    6.676346    .4615122    4.60517      8.537
+          id |      4,165         298    171.7821          1        595
+           t |      4,165           4     2.00024          1          7
+       tdum1 |      4,165    .1428571    .3499691          0          1
+-------------+---------------------------------------------------------
+       tdum2 |      4,165    .1428571    .3499691          0          1
+       tdum3 |      4,165    .1428571    .3499691          0          1
+       tdum4 |      4,165    .1428571    .3499691          0          1
+       tdum5 |      4,165    .1428571    .3499691          0          1
+       tdum6 |      4,165    .1428571    .3499691          0          1
+-------------+---------------------------------------------------------
+       tdum7 |      4,165    .1428571    .3499691          0          1
+        exp2 |      4,165     514.405    496.9962          1       2601
+
+. 
+.         ** note that using "sum" with panel data combines the within & between
+.         ** variation of each variable altogether. We cannot really see whether
+.         ** the variables are time-invariant or not, or whether they vary a lot
+.         ** across subjects (rather than within subjects)
+. 
+. browse          // to have a look at the data structure
+
+. * Note that the data are organized in "long" format - ready for xt commands
+. 
+. list id t exp wks occ in 1/21   // see how individuals are now observed over time
+
+     +--------------------------+
+     | id   t   exp   wks   occ |
+     |--------------------------|
+  1. |  1   1     3    32     0 |
+  2. |  1   2     4    43     0 |
+  3. |  1   3     5    40     0 |
+  4. |  1   4     6    39     0 |
+  5. |  1   5     7    42     0 |
+     |--------------------------|
+  6. |  1   6     8    35     0 |
+  7. |  1   7     9    32     0 |
+  8. |  2   1    30    34     1 |
+  9. |  2   2    31    27     1 |
+ 10. |  2   3    32    33     1 |
+     |--------------------------|
+ 11. |  2   4    33    30     1 |
+ 12. |  2   5    34    30     1 |
+ 13. |  2   6    35    37     1 |
+ 14. |  2   7    36    30     1 |
+ 15. |  3   1     6    50     1 |
+     |--------------------------|
+ 16. |  3   2     7    51     1 |
+ 17. |  3   3     8    50     1 |
+ 18. |  3   4     9    52     1 |
+ 19. |  3   5    10    52     1 |
+ 20. |  3   6    11    52     1 |
+     |--------------------------|
+ 21. |  3   7    12    46     1 |
+     +--------------------------+
+
+. 
+. * declare the data to be a panel
+. xtset id t
+
+Panel variable: id (strongly balanced)
+ Time variable: t, 1 to 7
+         Delta: 1 unit
+
+. order id t      // if we want to make these 2 vars the first ones appearing in the dataset
+
+. 
+. * Describe the overall structure of our panel data
+. xtdescribe
+
+      id:  1, 2, ..., 595                                    n =        595
+       t:  1, 2, ..., 7                                      T =          7
+           Delta(t) = 1 unit
+           Span(t)  = 7 periods
+           (id*t uniquely identifies each observation)
+
+Distribution of T_i:   min      5%     25%       50%       75%     95%     max
+                         7       7       7         7         7       7       7
+
+     Freq.  Percent    Cum. |  Pattern
+ ---------------------------+---------
+      595    100.00  100.00 |  1111111
+ ---------------------------+---------
+      595    100.00         |  XXXXXXX
+
+.                 * we have a perfectly balanced panel
+.                 * every individual is observed every year, for 7y
+.                 
+. *Summarize variables in terms of within vs between variation for key variables
+. xtsum lwage exp ed wks id t
+
+Variable         |      Mean   Std. dev.       Min        Max |    Observations
+-----------------+--------------------------------------------+----------------
+lwage    overall |  6.676346   .4615122    4.60517      8.537 |     N =    4165
+         between |             .3942387     5.3364   7.813596 |     n =     595
+         within  |             .2404023   4.781808   8.621092 |     T =       7
+                 |                                            |
+exp      overall |  19.85378   10.96637          1         51 |     N =    4165
+         between |             10.79018          4         48 |     n =     595
+         within  |              2.00024   16.85378   22.85378 |     T =       7
+                 |                                            |
+ed       overall |  12.84538   2.787995          4         17 |     N =    4165
+         between |             2.790006          4         17 |     n =     595
+         within  |                    0   12.84538   12.84538 |     T =       7
+                 |                                            |
+wks      overall |  46.81152   5.129098          5         52 |     N =    4165
+         between |             3.284016   31.57143   51.57143 |     n =     595
+         within  |             3.941881    12.2401   63.66867 |     T =       7
+                 |                                            |
+id       overall |       298   171.7821          1        595 |     N =    4165
+         between |              171.906          1        595 |     n =     595
+         within  |                    0        298        298 |     T =       7
+                 |                                            |
+t        overall |         4    2.00024          1          7 |     N =    4165
+         between |                    0          4          4 |     n =     595
+         within  |              2.00024          1          7 |     T =       7
+
+. 
+.                 * "ed" does not change within individuals - time-invariant
+.                 * this may be a drawback for some estimators
+.                 * likewise, id does not change within individuals; the "t" variable in turn does not change between i
+> ndividuals
+.                 * we can see that if we type "xtsum id t"
+.                 * all the other variables vary both across individuals and over time for the same individual
+. 
+. * Plot wage against time
+. twoway scatter lwage t          
+
+.                 * not too revealing
+.                 * variation in wages seems to increase over time
+.                 * at each point in time it only says something about between variation 
+.                 * i.e., across individuals
+.                 * we cannot see anything about within variation (for the same individual)
+.                 
+. xtline lwage if id < 10
+
+. xtline lwage if id < 10, overlay
+
+. 
+.                 * these are more appropriate to see both within and between variation in 
+.                 * wages. We see that most individuals increase their wage over time, but
+.                 * also there are great differences between individuals - individual hete-
+.                 * rogeneity may be significant in this setting
+. 
+. 
+. ***************************
+. * Exercise 2 - Pooled OLS *
+. ***************************
+. 
+. * pooled OLS with (incorrect) default standard errors
+. reg lwage ed exp exp2 wks
+
+      Source |       SS           df       MS      Number of obs   =     4,165
+-------------+----------------------------------   F(4, 4160)      =    411.62
+       Model |  251.491445         4  62.8728613   Prob > F        =    0.0000
+    Residual |  635.413457     4,160  .152743619   R-squared       =    0.2836
+-------------+----------------------------------   Adj R-squared   =    0.2829
+       Total |  886.904902     4,164  .212993492   Root MSE        =    .39082
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |   .0760407   .0022266    34.15   0.000     .0716754     .080406
+         exp |    .044675   .0023929    18.67   0.000     .0399838    .0493663
+        exp2 |  -.0007156   .0000528   -13.56   0.000    -.0008191   -.0006121
+         wks |    .005827   .0011827     4.93   0.000     .0035084    .0081456
+       _cons |   4.907961   .0673297    72.89   0.000     4.775959    5.039963
+------------------------------------------------------------------------------
+
+. 
+. * pooled OLS with clustered standard errors
+. reg lwage ed exp exp2 wks, vce(cluster id)
+
+Linear regression                               Number of obs     =      4,165
+                                                F(4, 594)         =      72.58
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2836
+                                                Root MSE          =     .39082
+
+                                   (Std. err. adjusted for 595 clusters in id)
+------------------------------------------------------------------------------
+             |               Robust
+       lwage | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |   .0760407   .0052122    14.59   0.000     .0658042    .0862772
+         exp |    .044675   .0054385     8.21   0.000     .0339941     .055356
+        exp2 |  -.0007156   .0001285    -5.57   0.000    -.0009679   -.0004633
+         wks |    .005827   .0019284     3.02   0.003     .0020396    .0096144
+       _cons |   4.907961   .1399887    35.06   0.000     4.633028    5.182894
+------------------------------------------------------------------------------
+
+. estimates store pooledOLS
+
+.         * While in the normal OLS Stata does not know that the different 
+.                 * observations pertains to the same individuals, by clustering the SE at
+.                 * the individual level, we get closer to do this (even if it is not the 
+.                 * best solution yet). By clustering the s.e. we are acknowledging that 
+.                 * some observations are correlated – in this case, observations pertaining 
+.                 * to the same individual. This way, unobservable characteristics that 
+.                 * pertain to the same individual (e.g. ability, personality) and that 
+.                 * could be correlated with observables are partially accounted for – but 
+.                 * this is far from perfect. This way, observations pertaining to the same 
+.                 * person are “grouped” and Stata adjusts for this correlation within that 
+.                 * same “cluster” – here, the individual. 
+. 
+. **********************************
+. * Exercise 3 - Within estimation *
+. **********************************
+. 
+. * data transformation - manually:
+. 
+. * generate individual averages 
+. egen mlwage = mean(lwage), by(id)
+
+. egen mexp = mean(exp), by(id)
+
+. egen mexp2 = mean(exp2), by(id)
+
+. egen mwks = mean(wks), by(id)
+
+. egen med = mean(ed), by(id)
+
+. 
+. * generate deviations from the individual averages
+. gen dmlwage = lwage-mlwage
+
+. gen dmexp = exp-mexp
+
+. gen dmexp2 = exp2-mexp2
+
+. gen dmwks = wks-mwks
+
+. gen dmed = ed-med
+
+. 
+. 
+. /* we could do it more efficiently with a loop 
+> (both means and deviations from means), as follows
+> 
+> foreach var of varlist lwage exp exp2 wks ed {
+> egen m`var' = mean(`var'), by(id) 
+> gen dm`var' = `var' - m`var'
+> } 
+> 
+> check our previous example in class
+> */
+. 
+. sort id t
+
+. list id t lwage mlwage dmlwage in 1/21, sep(7)
+
+     +-----------------------------------------+
+     | id   t     lwage     mlwage     dmlwage |
+     |-----------------------------------------|
+  1. |  1   1   5.56068   5.964758   -.4040785 |
+  2. |  1   2   5.72031   5.964758   -.2444482 |
+  3. |  1   3   5.99645   5.964758    .0316916 |
+  4. |  1   4   5.99645   5.964758    .0316916 |
+  5. |  1   5   6.06146   5.964758    .0967016 |
+  6. |  1   6   6.17379   5.964758    .2090316 |
+  7. |  1   7   6.24417   5.964758    .2794118 |
+     |-----------------------------------------|
+  8. |  2   1   6.16331   6.498446   -.3351359 |
+  9. |  2   2   6.21461   6.498446   -.2838359 |
+ 10. |  2   3    6.2634   6.498446   -.2350459 |
+ 11. |  2   4   6.54391   6.498446     .045464 |
+ 12. |  2   5   6.69703   6.498446    .1985841 |
+ 13. |  2   6   6.79122   6.498446    .2927742 |
+ 14. |  2   7   6.81564   6.498446     .317194 |
+     |-----------------------------------------|
+ 15. |  3   1   5.65249    6.51067     -.85818 |
+ 16. |  3   2   6.43615    6.51067   -.0745201 |
+ 17. |  3   3   6.54822    6.51067      .03755 |
+ 18. |  3   4   6.60259    6.51067    .0919199 |
+ 19. |  3   5    6.6958    6.51067    .1851296 |
+ 20. |  3   6   6.77878    6.51067    .2681098 |
+ 21. |  3   7   6.86066    6.51067    .3499899 |
+     +-----------------------------------------+
+
+. 
+. 
+. * Within regression manually - run OLS on the demeaned data:
+. reg dmlwage dmed dmexp dmexp2 dmwks 
+note: dmed omitted because of collinearity.
+
+      Source |       SS           df       MS      Number of obs   =     4,165
+-------------+----------------------------------   F(3, 4161)      =   2652.37
+       Model |  158.018789         3  52.6729298   Prob > F        =    0.0000
+    Residual |  82.6324168     4,161  .019858788   R-squared       =    0.6566
+-------------+----------------------------------   Adj R-squared   =    0.6564
+       Total |  240.651206     4,164  .057793277   Root MSE        =    .14092
+
+------------------------------------------------------------------------------
+     dmlwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        dmed |          0  (omitted)
+       dmexp |   .1137879   .0022859    49.78   0.000     .1093063    .1182694
+      dmexp2 |  -.0004244   .0000506    -8.39   0.000    -.0005235   -.0003252
+       dmwks |   .0008359   .0005552     1.51   0.132    -.0002527    .0019244
+       _cons |  -7.66e-09   .0021836    -0.00   1.000     -.004281     .004281
+------------------------------------------------------------------------------
+
+. 
+. * Within (or FE) estimator 
+. xtreg lwage ed exp exp2 wks, fe
+note: ed omitted because of collinearity.
+
+Fixed-effects (within) regression               Number of obs     =      4,165
+Group variable: id                              Number of groups  =        595
+
+R-squared:                                      Obs per group:
+     Within  = 0.6566                                         min =          7
+     Between = 0.0276                                         avg =        7.0
+     Overall = 0.0476                                         max =          7
+
+                                                F(3,3567)         =    2273.74
+corr(u_i, Xb) = -0.9107                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |          0  (omitted)
+         exp |   .1137879   .0024689    46.09   0.000     .1089473    .1186284
+        exp2 |  -.0004244   .0000546    -7.77   0.000    -.0005315   -.0003173
+         wks |   .0008359   .0005997     1.39   0.163    -.0003399    .0020116
+       _cons |   4.596396   .0389061   118.14   0.000     4.520116    4.672677
+-------------+----------------------------------------------------------------
+     sigma_u |  1.0362039
+     sigma_e |  .15220316
+         rho |  .97888036   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(594, 3567) = 53.12                  Prob > F = 0.0000
+
+. 
+.         ** note that results are practically the same, except for the constant term
+.         ** in the FE model, the constant term corresponds to the average of all
+.         ** individual FE. In the OLS run on the demeaned data, it has no real meaning
+.         
+.         ** be aware of the different s.e. - why? different degrees of freedom in 
+.         ** each model - due to the use of dummy variables for each individual in FE
+.         
+.         ** note also the missing coefficients for time-invariant variables
+.         ** we lose these variables if we use FE, since there is not within variation
+.         ** to identify those coefficients
+.         
+.         ** The F-test checks whether all fixed effects are insignificant versus the
+.         ** alternative that at least one of the individual fe is significantly != 0
+. /* 
+> Rho: indicates the proportion of the variance that is explained by individual 
+> specific effects 
+> sigma_u: sd of the individual's fixed effect (a_i in the slides)
+> sigma_e: sd of the transitory shocks (u_i in the slides) */
+. 
+. estimates store within
+
+. 
+. * run LSDV instead, using individual dummies
+. *set matsize 800        /// probably no longer necessary in the latest versions of Stata        
+> reg lwage exp exp2 wks i.id  
+.         
+. // i.id creates automatically dummies for each N-1 individual
+. // Education is not in the model as it does not vary within the individual
+. // Note we now get the same standard errors as in the "automatic" FE model.
+. 
+. 
+. *******************************
+. * Exercise 4 - Random Effects *
+. *******************************
+. xtreg lwage ed exp exp2 wks, re
+
+Random-effects GLS regression                   Number of obs     =      4,165
+Group variable: id                              Number of groups  =        595
+
+R-squared:                                      Obs per group:
+     Within  = 0.6340                                         min =          7
+     Between = 0.1716                                         avg =        7.0
+     Overall = 0.1830                                         max =          7
+
+                                                Wald chi2(4)      =    3012.45
+corr(u_i, X) = 0 (assumed)                      Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |   .1117099   .0060572    18.44   0.000     .0998381    .1235818
+         exp |   .0888609   .0028178    31.54   0.000     .0833382    .0943837
+        exp2 |  -.0007726   .0000623   -12.41   0.000    -.0008946   -.0006505
+         wks |   .0009658   .0007433     1.30   0.194     -.000491    .0024226
+       _cons |   3.829366   .0936336    40.90   0.000     3.645848    4.012885
+-------------+----------------------------------------------------------------
+     sigma_u |  .31951859
+     sigma_e |  .15220316
+         rho |  .81505521   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. estimates store randeff
+
+. 
+. 
+. **********************************
+. * Exercise 5 - Comparing Results *
+. **********************************
+. estimates table pooledOLS within randeff
+
+-----------------------------------------------------
+    Variable | pooledOLS      within      randeff    
+-------------+---------------------------------------
+          ed |  .07604069    (omitted)    .11170995  
+         exp |  .04467505    .11378786    .08886094  
+        exp2 | -.00071563   -.00042437   -.00077256  
+         wks |  .00582698    .00083588    .00096577  
+       _cons |  4.9079608    4.5963962    3.8293663  
+-----------------------------------------------------
+
+. * nicer table (install esttab - if you don't have it)
+. esttab pooledOLS within randeff, replace cells(b(star fmt(3)) se(par fmt(3))) r2(3) ///
+>         star(* 0.10 ** 0.05 *** 0.01) mtitles("OLS" "FE" "RE")
+
+------------------------------------------------------------
+                      (1)             (2)             (3)   
+                      OLS              FE              RE   
+                     b/se            b/se            b/se   
+------------------------------------------------------------
+ed                  0.076***        0.000           0.112***
+                  (0.005)             (.)         (0.006)   
+exp                 0.045***        0.114***        0.089***
+                  (0.005)         (0.002)         (0.003)   
+exp2               -0.001***       -0.000***       -0.001***
+                  (0.000)         (0.000)         (0.000)   
+wks                 0.006***        0.001           0.001   
+                  (0.002)         (0.001)         (0.001)   
+_cons               4.908***        4.596***        3.829***
+                  (0.140)         (0.039)         (0.094)   
+------------------------------------------------------------
+N                    4165            4165            4165   
+R-sq                0.284           0.657                   
+------------------------------------------------------------
+
+. 
+. * Hausman test
+. hausman within randeff
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |     within      randeff       Difference       Std. err.
+-------------+----------------------------------------------------------------
+         exp |    .1137879     .0888609        .0249269               .
+        exp2 |   -.0004244    -.0007726        .0003482               .
+         wks |    .0008359     .0009658       -.0001299               .
+------------------------------------------------------------------------------
+                          b = Consistent under H0 and Ha; obtained from xtreg.
+           B = Inconsistent under Ha, efficient under H0; obtained from xtreg.
+
+Test of H0: Difference in coefficients not systematic
+
+    chi2(3) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+            = 6191.43
+Prob > chi2 =  0.0000
+(V_b-V_B is not positive definite)
+
+. //H0 is equivalent to "RE estimator is appropriate" (i.e., no correlation between 
+. // individual effects and the other X variables) -- we reject it, FE is preferred
+. 
+. * re-run FE, including interactions between education & time
+. xtreg lwage c.ed##i.t exp exp2 wks, fe
+note: ed omitted because of collinearity.
+note: exp omitted because of collinearity.
+
+Fixed-effects (within) regression               Number of obs     =      4,165
+Group variable: id                              Number of groups  =        595
+
+R-squared:                                      Obs per group:
+     Within  = 0.6645                                         min =          7
+     Between = 0.0020                                         avg =        7.0
+     Overall = 0.0855                                         max =          7
+
+                                                F(14,3556)        =     503.12
+corr(u_i, Xb) = -0.2896                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+       lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |          0  (omitted)
+             |
+           t |
+          2  |   .1162567   .0413169     2.81   0.005     .0352495    .1972639
+          3  |   .0952435   .0416913     2.28   0.022     .0135023    .1769847
+          4  |   .1744546   .0423728     4.12   0.000     .0913771     .257532
+          5  |   .3030234   .0433179     7.00   0.000     .2180929    .3879539
+          6  |   .4303758   .0445363     9.66   0.000     .3430566     .517695
+          7  |   .4847721   .0460675    10.52   0.000     .3944508    .5750934
+             |
+      t#c.ed |
+          2  |  -.0011651   .0031352    -0.37   0.710    -.0073121    .0049819
+          3  |     .01168   .0031396     3.72   0.000     .0055245    .0178355
+          4  |   .0142661   .0031474     4.53   0.000     .0080954    .0204369
+          5  |   .0123858   .0031577     3.92   0.000     .0061946    .0185769
+          6  |    .009658   .0031701     3.05   0.002     .0034427    .0158733
+          7  |   .0133746   .0031858     4.20   0.000     .0071285    .0196207
+             |
+         exp |          0  (omitted)
+        exp2 |  -.0003406   .0000556    -6.12   0.000    -.0004496   -.0002315
+         wks |   .0007677   .0005957     1.29   0.198    -.0004002    .0019356
+       _cons |    6.47596   .0370525   174.78   0.000     6.403314    6.548606
+-------------+----------------------------------------------------------------
+     sigma_u |  .43786734
+     sigma_e |  .15067688
+         rho |  .89412218   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(594, 3556) = 36.46                  Prob > F = 0.0000
+
+. 
+. 
+.         * we actually see that the return to education had increased over time
+.         * i.e., the return to education in years 3-7 seems to be about 1 pp higher
+.         * than in year 1.
+.         * however, note that we cannot estimate the return to education per se, only
+.         * whether the return to education has been changing over time (relative rather
+.         * than absolute return)
+.         
+. 
+. ********************************************
+. * Exercise 6 - First differences estimator *
+. ********************************************
+. * Generate first-differences 
+. sort id t
+
+. gen Dlwage = D.lwage
+(595 missing values generated)
+
+. gen Dexp = D.exp
+(595 missing values generated)
+
+. gen Dexp2 = D.exp2
+(595 missing values generated)
+
+. gen Dwks = D.wks
+(595 missing values generated)
+
+. gen Ded = D.ed
+(595 missing values generated)
+
+. 
+. * run OLS on the transformed data
+. reg Dlwage Ded Dexp Dexp2 Dwks
+note: Ded omitted because of collinearity.
+note: Dexp omitted because of collinearity.
+
+      Source |       SS           df       MS      Number of obs   =     3,570
+-------------+----------------------------------   F(2, 3567)      =      7.36
+       Model |  .485007822         2  .242503911   Prob > F        =    0.0006
+    Residual |   117.57812     3,567  .032962748   R-squared       =    0.0041
+-------------+----------------------------------   Adj R-squared   =    0.0035
+       Total |  118.063128     3,569   .03308017   Root MSE        =    .18156
+
+------------------------------------------------------------------------------
+      Dlwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         Ded |          0  (omitted)
+        Dexp |          0  (omitted)
+       Dexp2 |  -.0005321   .0001393    -3.82   0.000    -.0008052   -.0002591
+        Dwks |  -.0002683   .0005648    -0.47   0.635    -.0013757    .0008392
+       _cons |   .1170654   .0063106    18.55   0.000     .1046927    .1294381
+------------------------------------------------------------------------------
+
+. 
+. * or use D. operator and obtain the same estimates automatically
+. reg D.lwage D.ed D.exp D.exp2 D.wks
+note: D.ed omitted because of collinearity.
+note: D.exp omitted because of collinearity.
+
+      Source |       SS           df       MS      Number of obs   =     3,570
+-------------+----------------------------------   F(2, 3567)      =      7.36
+       Model |  .485007822         2  .242503911   Prob > F        =    0.0006
+    Residual |   117.57812     3,567  .032962748   R-squared       =    0.0041
+-------------+----------------------------------   Adj R-squared   =    0.0035
+       Total |  118.063128     3,569   .03308017   Root MSE        =    .18156
+
+------------------------------------------------------------------------------
+     D.lwage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          ed |
+         D1. |          0  (omitted)
+             |
+         exp |
+         D1. |          0  (omitted)
+             |
+        exp2 |
+         D1. |  -.0005321   .0001393    -3.82   0.000    -.0008052   -.0002591
+             |
+         wks |
+         D1. |  -.0002683   .0005648    -0.47   0.635    -.0013757    .0008392
+             |
+       _cons |   .1170654   .0063106    18.55   0.000     .1046927    .1294381
+------------------------------------------------------------------------------
+
+. 
+.         // note that the nr of observations drops because we lose one year of info.
+.         // because we need to calculate the differences between adjacent years for
+.         // all variables, the difference in education and experience becomes constant
+.         // 0 and 1, respectively (because education does not change and experience
+.         // always increases by 1 every year). The variables are dropped due to collinearity
+. 
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econometrics for PhD\Session 7\worksho
+> p_paneldata.log
+  log type:  text
+ closed on:   2 Dec 2022, 17:45:22
+-----------------------------------------------------------------------------------------------------------------------

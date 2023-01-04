@@ -1,0 +1,151 @@
+# Question 1
+
+really
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+source('r/pre-processing.r')
+``` 
+
+
+#### q1.a
+
+
+The t-value is far belov the critical value, so we can reject the null hypothesis. The difference between the two means is statistically significant.  
+
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+t.test(f1[edgrp == 2, dmfwg28], f1[edgrp == 4, dmfwg28], alternative = 'two.sided', var.equal = TRUE, conf.level = 0.95) 
+
+
+```
+
+
+
+#### q1.b
+
+The difference between the two groups constructed is significant. It was not signified in the question which group should include the actual median value, so I decided to add that to the below-median group. 
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+
+f1[urate1980 <= median(urate1980) , above_p50_urate1980 :=  FALSE ]
+f1[urate1980 > median(urate1980) , above_p50_urate1980 :=  TRUE ]
+# f1[, .N, above_p50_urate1980]
+
+q1b <- unique(f1, by=qc(cmsa99, urate1980, above_p50_urate1980)) 
+# dt_ttest(f1, 'above_p50_urate1980', 'pcemp_m_c2000')
+t.test(q1b[above_p50_urate1980 == FALSE, pcemp_m_c2000], q1b[above_p50_urate1980 == TRUE, pcemp_m_c2000], alternative = 'two.sided', var.equal = TRUE, conf.level = 0.95) 
+
+# q1b[, .N, above_p50_urate1980]
+
+
+# f1[, .N]
+
+
+```
+
+when removing reducant observations by each metropolitan area, there are exactly 115 observations in the below-median group, and 115 observations in the above-median group. 
+
+
+
+#### q1.c 
+
+
+there is a negative and significant correlation of moderate strength between all the educational groups and pc use, except the college educated. This means that the more  adoption of pc use in 2000, the more the wage gap has declined.  However, since this is the case for all but one  educational levels, and the correlations do not increase in a linear way, the correlations sends mixed signals about the theory of the paper. 
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+map_dfr(unique(f1$edgrp), .id='edgrp', ~ f1[edgrp == .x, .(dmfwg28, pcemp_m_c2000)] %>% dtcor()) 
+
+```
+
+There is a positive and significant correlation of moderate-to-low strength between the wage gap between short- and long-educated workers, meaning that more pc use is correlated with the wage gap between the two widening. This is with a very high probability also the case in the population, the pearson test is telling us.
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+dtcor(f1[, .(pcemp_m_c2000, drtc28)])
+
+```
+
+
+That this is the findings in the raw correlations supports a further causal investigation.
+
+
+
+#### q1.d
+
+The main explanatory variable, PC use, is significant and negative, meaning that it decreased the wage gap.
+
+According to this prelimary model, the wage gap between the reference group, DO/Highschool Dropouts, all the other groups have a positive and significant coefficient.  Even when controlling for adoption of PC USE, which is also significant, we see that the intercept, meaning the value for the DO group, is negative and significant. What's interesting is that all the other educational groups - which are all higher levels in education than the reference - have a positive sign on their parameters, so that the difference is *less* than for the least-educated. 
+
+While I have not conducted any formal test to support this, I note that the decrease in the wage gap is decreasing the higher the level of education. 
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+mod_naive_ols <- feols(dmfwg28 ~ edgrp + pcemp_m_c2000, data = f1, vcov='hetero')
+mod_naive_ols  %>% etable()
+```
+
+
+
+#### q1.e
+
+Since the earnings differential between low and high educated workers is aggregrated at the metropolitan area, it should by fitted with  230 observations.
+
+We see that the earnings differentail is not significant, which to me is very surprising. doing a quick log transformation on the outcome variable did not change anything either.
+
+
+``` {r }
+
+q1e  <- unique(f1[, .(cmsa99, drtc28, pcemp_m_c2000)] ) 
+mod_q1e <- feols(q1e, drtc28 ~ pcemp_m_c2000, vcov='hetero')
+mod_q1e  %>% etable()
+```
+
+#### q1.f
+
+
+
+In this model, only the main effect of the fifth educational group is significant at the 5% level, everything else has become insignificant.   
+
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+mod_q1f <- feols(dmfwg28 ~ edgrp * pcemp_m_c2000, data = f1, vcov='hetero')
+etable(mod_q1f, mod_naive_ols)
+```
+
+
+
+A joint F-test of the interaction effects cannot reject the H0 hypothesis, so we must conclude that these do not contribute to explaining the wage meaning - meaning: There does not seem to be any difference in the way that PC use affects the educational groups differently. 
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+wald(mod_q1f, 'edgrp.*pcemp')
+```
+
+#### q1.g
+
+A joint test of signifance shows that they do contribute to explaining the wage gap. However, only the percentage employed in non-manufacturing in 1980 is signifant at the 5 % level. The adjusted R-squared does not rise more than ~ 1 percentage point, so it does not seem to contribute much to the model. 
+
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+mod_q1g <- feols(dmfwg28 ~ edgrp + pcemp_m_c2000 + durmf1980 + nondmf1980 + durmf1980lo + nondmf1980lo, data = f1, vcov='hetero')
+etable(mod_q1g, mod_naive_ols)
+wald(mod_q1g, 'durm|nondm')
+
+```
+
+Note that the data seems kind of strange, since looking at the three first areas, e.g. 15 observations, there are 0 values for the top educational groups in all three areas. I cannot figure out if this is supposed to be like that, but it does seem sketchy. 
+
+also, seen these variables - except this strange glitch - does not varies within metropolitan area, a simple OLS is probably not the best solution.
+
+``` {r,  echo=FALSE, message=FALSE, warning=FALSE}
+
+f1[1:15, .(cmsa99, edgrp , pcemp_m_c2000 , durmf1980 , nondmf1980 , durmf1980lo , nondmf1980lo) ]
+```

@@ -1,0 +1,244 @@
+
+. 
+. use cis3samp.dta, clear
+
+. 
+. ********** MERGING **********
+. * Merge information from the register dataset
+. merge 1:1 id using register.dta
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,100  (_merge==3)
+    -----------------------------------------
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            Matched (3) |      1,100      100.00      100.00
+------------------------+-----------------------------------
+                  Total |      1,100      100.00
+
+. drop _merge
+
+. * Merge information from the exercise3_extra_data dataset
+. merge 1:1 id using Exercise3_extra_data.dta
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                             1,100  (_merge==3)
+    -----------------------------------------
+
+. tab _merge
+
+   Matching result from |
+                  merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+            Matched (3) |      1,100      100.00      100.00
+------------------------+-----------------------------------
+                  Total |      1,100      100.00
+
+. drop _merge
+
+. 
+. ********** GENERATING KEY VARIABLES **********
+. * R&D Intensity = (Internal R&D investment)/(turnover)
+. gen rdint = xinterm/idbrturn
+(572 missing values generated)
+
+. * Export Intensity = (Exports volume)/(Turnover)
+. gen expint = export00/idbrturn
+(156 missing values generated)
+
+. * Capital Expenditure Intensity = (Capital Intensity)/(Turnover)
+. gen capint = capex00/idbrturn
+(81 missing values generated)
+
+. * Natual Log of the number of employees in the year 2000
+. gen lempl00 = log(employ00)
+(28 missing values generated)
+
+. 
+. drop if expint > 1 
+(183 observations deleted)
+
+. drop if rdint > 1 & rdint != . /*we drop observations that don't make sense, but not o
+> bservations with missing data*/
+(2 observations deleted)
+
+. 
+. 
+. ********** Some descriptives **********
+. count
+  915
+
+. su prodnew extsource rdint, detail
+
+                           PRODNEW
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 907
+25%            0              0       Sum of wgt.         907
+
+50%            0                      Mean           4.241455
+                        Largest       Std. dev.      12.91303
+75%            0            100
+90%           10            100       Variance       166.7463
+95%           25            100       Skewness       4.731537
+99%           70            100       Kurtosis        28.8874
+
+                          extsource
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -1.233602      -1.233602
+ 5%    -1.233602      -1.233602
+10%    -1.233602      -1.233602       Obs                 778
+25%    -.9829678      -1.233602       Sum of wgt.         778
+
+50%    -.0322727                      Mean           .0136345
+                        Largest       Std. dev.      1.006484
+75%     .7731154       2.664482
+90%     1.337893       2.915117       Variance        1.01301
+95%     1.744554        2.93586       Skewness       .3761265
+99%     2.559965       3.233631       Kurtosis       2.318772
+
+                            rdint
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            0              0
+10%            0              0       Obs                 456
+25%            0              0       Sum of wgt.         456
+
+50%            0                      Mean           .0112383
+                        Largest       Std. dev.      .0500656
+75%     .0056919       .2178649
+90%     .0271003       .2408715       Variance       .0025066
+95%      .050557       .6139128       Skewness       10.70534
+99%     .1649157       .7211539       Kurtosis        137.479
+
+. pwcorr prodnew extsource rdint inconst lempl00
+
+             |  prodnew extsou~e    rdint  inconst  lempl00
+-------------+---------------------------------------------
+     prodnew |   1.0000 
+   extsource |   0.1979   1.0000 
+       rdint |   0.2551   0.0879   1.0000 
+     inconst |   0.0756   0.3529   0.0206   1.0000 
+     lempl00 |   0.0651   0.3103   0.0244   0.1154   1.0000 
+
+. pwcorr prodnew extsource rdint inconst lempl00, star(0.01)
+
+             |  prodnew extsou~e    rdint  inconst  lempl00
+-------------+---------------------------------------------
+     prodnew |   1.0000 
+   extsource |   0.1979*  1.0000 
+       rdint |   0.2551*  0.0879   1.0000 
+     inconst |   0.0756   0.3529*  0.0206   1.0000 
+     lempl00 |   0.0651   0.3103*  0.0244   0.1154*  1.0000 
+
+. hist prodnew
+(bin=29, start=0, width=3.4482759)
+
+. hist extsource
+(bin=27, start=-1.233602, width=.16545307)
+
+. hist rdint
+(bin=21, start=0, width=.03434066)
+
+. twoway scatter prodnew extsource
+
+. twoway scatter prodnew rdint
+
+. twoway scatter prodnew lempl00
+
+. twoway scatter rdint lempl00
+
+. 
+. 
+. ********** Regression w/o interactions **********
+. reg prodnew extsource rdint inconst lempl00 
+
+      Source |       SS           df       MS      Number of obs   =       431
+-------------+----------------------------------   F(4, 426)       =      8.40
+       Model |  9180.92541         4  2295.23135   Prob > F        =    0.0000
+    Residual |  116446.369       426  273.348285   R-squared       =    0.0731
+-------------+----------------------------------   Adj R-squared   =    0.0644
+       Total |  125627.295       430  292.156499   Root MSE        =    16.533
+
+------------------------------------------------------------------------------
+     prodnew | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   1.783287   .9492444     1.88   0.061    -.0824993    3.649072
+       rdint |   81.84784   15.56667     5.26   0.000      51.2508    112.4449
+     inconst |  -.4209745   .9246204    -0.46   0.649    -2.238361    1.396412
+     lempl00 |  -.6125164    .580955    -1.05   0.292    -1.754411    .5293787
+       _cons |   8.884929   2.638725     3.37   0.001     3.698388    14.07147
+------------------------------------------------------------------------------
+
+. *Making it more readable:
+. gen rdintpct=rdint*100
+(459 missing values generated)
+
+. reg prodnew extsource rdintpct inconst lempl00 
+
+      Source |       SS           df       MS      Number of obs   =       431
+-------------+----------------------------------   F(4, 426)       =      8.40
+       Model |  9180.92543         4  2295.23136   Prob > F        =    0.0000
+    Residual |  116446.369       426  273.348285   R-squared       =    0.0731
+-------------+----------------------------------   Adj R-squared   =    0.0644
+       Total |  125627.295       430  292.156499   Root MSE        =    16.533
+
+------------------------------------------------------------------------------
+     prodnew | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   extsource |   1.783287   .9492444     1.88   0.061    -.0824993    3.649072
+    rdintpct |   .8184784   .1556667     5.26   0.000      .512508    1.124449
+     inconst |  -.4209745   .9246204    -0.46   0.649    -2.238361    1.396412
+     lempl00 |  -.6125164    .580955    -1.05   0.292    -1.754411    .5293787
+       _cons |   8.884929   2.638725     3.37   0.001     3.698388    14.07147
+------------------------------------------------------------------------------
+
+. *Now it's easier to see the significant effect if R&D intensity - as we increase the R
+> &D intensity by 1pp, the share of turnover from new products will increase by 0.82pp.
+. *An increase by one std deviation of extsource will increase prodnew by 1.78pp - but i
+> t's not significant at the 5% level.
+. *The effects of size (and internal constraints) are not significant.
+. 
+. 
+. //F-tests for individual significance of each variable
+. test rdint 
+
+ ( 1)  rdintpct = 0
+
+       F(  1,   426) =   27.65
+            Prob > F =    0.0000
+
+. test extsource
+
+ ( 1)  extsource = 0
+
+       F(  1,   426) =    3.53
+            Prob > F =    0.0610
+
+. test lempl00
+
+ ( 1)  lempl00 = 0
+
+       F(  1,   426) =    1.11
+            Prob > F =    0.2923
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\ys.si\OneDrive - CBS - Copenhagen Business School\teaching\Econome
+> trics for PhD\Session 1\statalog.txt
+  log type:  text
+ closed on:  14 Oct 2022, 12:51:03
+----------------------------------------------------------------------------------------
